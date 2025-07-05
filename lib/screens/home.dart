@@ -29,8 +29,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _scrollToCitiesSection() {
-    // Calculate the position to scroll to (hero section height + some padding)
-    final targetPosition = 400.h + 80.h; // Hero height + AppBar height
+
+    final targetPosition = 400.h +220.h+ 190.h; 
     
     _scrollController.animateTo(
       targetPosition,

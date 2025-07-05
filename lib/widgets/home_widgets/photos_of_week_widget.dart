@@ -321,7 +321,7 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                                                 color: Colors.white,
                                               ),
                                             ),
-                                            SizedBox(height: 8.h),
+                                            SizedBox(height: 2.h),
                                             Text(
                                               photo.cityName,
                                               style: TextStyle(
@@ -329,17 +329,12 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                                                 color: Colors.white70,
                                               ),
                                             ),
-                                            SizedBox(height: 16.h),
-                                            
-                                            // Action buttons
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                // Preview button
+                                            SizedBox(height: 8.h),
+                                                                                            // Details button
                                                 ElevatedButton.icon(
-                                                  onPressed: () => _showImagePreview(photo),
-                                                  icon: const Icon(Icons.zoom_in, size: 20),
-                                                  label: const Text('Preview'),
+                                                  onPressed: () => _showPhotoDetails(photo),
+                                                  icon: const Icon(Icons.info_outline, size: 20),
+                                                  label: const Text('View Details'),
                                                   style: ElevatedButton.styleFrom(
                                                     backgroundColor: Colors.white,
                                                     foregroundColor: Colors.black,
@@ -352,26 +347,7 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                                                     ),
                                                   ),
                                                 ),
-                                                
-                                                // Details button
-                                                ElevatedButton.icon(
-                                                  onPressed: () => _showPhotoDetails(photo),
-                                                  icon: const Icon(Icons.info_outline, size: 20),
-                                                  label: const Text('Details'),
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.blue,
-                                                    foregroundColor: Colors.white,
-                                                    padding: EdgeInsets.symmetric(
-                                                      horizontal: 16.w,
-                                                      vertical: 8.h,
-                                                    ),
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(20.r),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                               SizedBox(height: 12.h),
                                           ],
                                         ),
                                       ),
