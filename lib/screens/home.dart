@@ -57,8 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
             CustomScrollView(
               controller: _scrollController,
               slivers: [
-                // Add space for the fixed app bar
-                SliverToBoxAdapter(child: SizedBox(height: 80.h)),
                 // Hero Section
                 SliverToBoxAdapter(
                   child: HeroSection(
