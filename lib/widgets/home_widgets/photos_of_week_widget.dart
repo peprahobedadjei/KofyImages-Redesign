@@ -299,7 +299,7 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                                             end: Alignment.bottomCenter,
                                             colors: [
                                               Colors.transparent,
-                                              Colors.black.withOpacity(0.7),
+                                              Colors.black
                                             ],
                                           ),
                                         ),
@@ -385,7 +385,7 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                               margin: EdgeInsets.only(bottom: 10.h),
                               builder: DotSwiperPaginationBuilder(
                                 activeColor: Colors.blue,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white,
                                 size: 8.0,
                                 activeSize: 10.0,
                               ),

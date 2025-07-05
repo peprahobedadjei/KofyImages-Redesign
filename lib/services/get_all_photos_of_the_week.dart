@@ -9,20 +9,16 @@ class PhotoOfWeekService {
     try {
       final response = await http.get(
         Uri.parse(ApiEndpoints.getAllPhotosOfTheWeek),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         return PhotoOfWeekResponse.fromJson(data);
       } else {
-        print('Failed to load photos of the week: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Error fetching photos of the week: $e');
       return null;
     }
   }

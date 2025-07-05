@@ -35,7 +35,7 @@ class SideDrawer extends StatelessWidget {
                     height: 80.h,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white
                     ),
                     child: Icon(
                       Icons.person,
@@ -56,8 +56,7 @@ class SideDrawer extends StatelessWidget {
                     'Obed is here',
                     style: GoogleFonts.montserrat(
                       fontSize: 14.sp,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
+                      color: Colors.white)
                   ),
                 ],
               ),
