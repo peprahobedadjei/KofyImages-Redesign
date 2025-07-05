@@ -49,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return ConnectionListener(
       child: Scaffold(
+        appBar: const CustomAppBar(),
         backgroundColor: Colors.grey[50],
         drawer: const SideDrawer(),
         body: Stack(
@@ -72,8 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-            // Fixed App Bar (positioned at top)
-            const Positioned(top: 0, left: 0, right: 0, child: CustomAppBar()),
           ],
         ),
       ),

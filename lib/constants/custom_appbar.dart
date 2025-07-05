@@ -27,13 +27,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Logo on the left
               SizedBox(
                 width: 100.w,
-                height: 200.h,
-
+                height: 150.h,
                 child: Image.asset('assets/logo_white.JPG', fit: BoxFit.cover),
               ),
-              // Left side - Hamburger Menu and Cart Icon
+
+              // Icons on the right
               Row(
                 children: [
                   // Cart Icon
@@ -42,8 +43,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              const ConnectionListener(child: EmptyCartPage()),
+                          builder: (_) => const ConnectionListener(
+                            child: EmptyCartPage(),
+                          ),
                         ),
                       );
                     },
@@ -63,8 +65,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                               size: 24.sp,
                             ),
                           ),
-                          // Cart badge 
-                       Positioned(
+                          // Cart badge
+                          Positioned(
                             right: 0.w,
                             top: 0.h,
                             child: Container(
@@ -76,7 +78,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  '10',
+                                  '10', // You can make this dynamic later
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 10.sp,
@@ -90,30 +92,32 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w), // Space between hamburger and cart
-                  // Hamburger Menu
-                  GestureDetector(
-                    onTap: () {
-                      Scaffold.of(context).openDrawer();
-                    },
-                    child: Container(
-                      width: 40.w,
-                      height: 40.h,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Icon(
-                        Icons.menu,
-                        color: Colors.black,
-                        size: 24.sp,
+
+                  SizedBox(width: 12.w),
+
+                  // Hamburger menu wrapped in Builder to access Scaffold
+                  Builder(
+                    builder: (context) => GestureDetector(
+                      onTap: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      child: Container(
+                        width: 40.w,
+                        height: 40.h,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Icon(
+                          Icons.menu,
+                          color: Colors.black,
+                          size: 24.sp,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-
-              // Right side - Logo
             ],
           ),
         ),
@@ -122,5 +126,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(115.h);
+  Size get preferredSize => Size.fromHeight(80.h);
 }
