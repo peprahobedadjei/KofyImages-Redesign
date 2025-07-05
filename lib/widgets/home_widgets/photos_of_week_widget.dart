@@ -1,4 +1,3 @@
-// widgets/photos_of_week_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -48,38 +47,6 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
     }
   }
 
-  void _showImagePreview(PhotoOfWeek photo) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Stack(
-          children: [
-            Center(
-              child: Hero(
-                tag: 'photo_${photo.id}',
-                child: CachedNetworkImage(
-                  imageUrl: photo.imageUrl,
-                  fit: BoxFit.contain,
-                  placeholder: (context, url) => const CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 40.h,
-              right: 20.w,
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showPhotoDetails(PhotoOfWeek photo) {
     showModalBottomSheet(
       context: context,
@@ -112,7 +79,7 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                   ),
                 ),
                 SizedBox(height: 20.h),
-                
+
                 // Photo preview
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12.r),
@@ -134,21 +101,25 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                   ),
                 ),
                 SizedBox(height: 20.h),
-                
+
                 // Name
                 _buildDetailRow('🏙️', 'Name', photo.title),
                 SizedBox(height: 16.h),
-                
+
                 // City
                 _buildDetailRow('🌍', 'City', photo.cityName),
                 SizedBox(height: 16.h),
-                
+
                 // Creator
                 _buildDetailRow('👤', 'Creator', photo.creatorName),
                 SizedBox(height: 16.h),
-                
+
                 // Description
-                _buildDetailRow('📝', 'Description', photo.photoOfWeekDescription),
+                _buildDetailRow(
+                  '📝',
+                  'Description',
+                  photo.photoOfWeekDescription,
+                ),
               ],
             ),
           ),
@@ -161,10 +132,7 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          emoji,
-          style: TextStyle(fontSize: 16.sp),
-        ),
+        Text(emoji, style: TextStyle(fontSize: 16.sp)),
         SizedBox(width: 8.w),
         Expanded(
           child: Column(
@@ -214,161 +182,194 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
             ),
           ),
           SizedBox(height: 20.h),
-          
+
           // Content
           SizedBox(
             height: 400.h,
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : hasError
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.error_outline, size: 50.sp, color: Colors.grey),
-                            SizedBox(height: 10.h),
-                            Text(
-                              'Failed to load photos',
-                              style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 50.sp,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 10.h),
+                        Text(
+                          'Failed to load photos',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.red,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          'Please check your internet connection',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12.sp,
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 12.h),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                          ),
+
+                          onPressed: () {
+                            setState(() {
+                              isLoading = true;
+                              hasError = false;
+                            });
+                            _fetchPhotos();
+                          },
+                          child: Text(
+                            'Retry',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
                             ),
-                            SizedBox(height: 10.h),
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  isLoading = true;
-                                  hasError = false;
-                                });
-                                _fetchPhotos();
-                              },
-                              child: const Text('Retry'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : photos.isEmpty
+                ? Center(
+                    child: Text(
+                      'No photos available',
+                      style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                    ),
+                  )
+                : Swiper(
+                    itemCount: photos.length,
+                    itemBuilder: (context, index) {
+                      final photo = photos[index];
+                      return Container(
+                        margin: EdgeInsets.symmetric(horizontal: 20.w),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withAlpha(26),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
-                      )
-                    : photos.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No photos available',
-                              style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                            ),
-                          )
-                        : Swiper(
-                            itemCount: photos.length,
-                            itemBuilder: (context, index) {
-                              final photo = photos[index];
-                              return Container(
-                                margin: EdgeInsets.symmetric(horizontal: 20.w),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                     color: Colors.black.withAlpha(26),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 5),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.r),
+                          child: Stack(
+                            children: [
+                              // Photo
+                              Hero(
+                                tag: 'photo_${photo.id}',
+                                child: CachedNetworkImage(
+                                  imageUrl: photo.imageUrl,
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(
+                                    color: Colors.grey[200],
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
                                     ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  child: Stack(
-                                    children: [
-                                      // Photo
-                                      Hero(
-                                        tag: 'photo_${photo.id}',
-                                        child: CachedNetworkImage(
-                                          imageUrl: photo.imageUrl,
-                                          height: double.infinity,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) => Container(
-                                            color: Colors.grey[200],
-                                            child: const Center(child: CircularProgressIndicator()),
-                                          ),
-                                          errorWidget: (context, url, error) => Container(
-                                            color: Colors.grey[200],
-                                            child: const Icon(Icons.error),
-                                          ),
-                                        ),
-                                      ),
-                                      
-                                      // Gradient overlay
+                                  ),
+                                  errorWidget: (context, url, error) =>
                                       Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.transparent,
-                                              Colors.black
-                                            ],
-                                          ),
-                                        ),
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.error),
                                       ),
-                                      
-                                      // Content
-                                      Positioned(
-                                        bottom: 20.h,
-                                        left: 20.w,
-                                        right: 20.w,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              photo.title,
-                                              style: TextStyle(
-                                                fontSize: 20.sp,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            SizedBox(height: 2.h),
-                                            Text(
-                                              photo.cityName,
-                                              style: TextStyle(
-                                                fontSize: 16.sp,
-                                                color: Colors.white70,
-                                              ),
-                                            ),
-                                            SizedBox(height: 8.h),
-                                                                                            // Details button
-                                                ElevatedButton.icon(
-                                                  onPressed: () => _showPhotoDetails(photo),
-                                                  icon: const Icon(Icons.info_outline, size: 20),
-                                                  label: const Text('View Details'),
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.white,
-                                                    foregroundColor: Colors.black,
-                                                    padding: EdgeInsets.symmetric(
-                                                      horizontal: 16.w,
-                                                      vertical: 8.h,
-                                                    ),
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(20.r),
-                                                    ),
-                                                  ),
-                                                ),
-                                               SizedBox(height: 12.h),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                ),
+                              ),
+
+                              // Gradient overlay
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Colors.transparent, Colors.black],
                                   ),
                                 ),
-                              );
-                            },
-                            pagination: SwiperPagination(
-                              alignment: Alignment.bottomCenter,
-                              margin: EdgeInsets.only(bottom: 10.h),
-                              builder: DotSwiperPaginationBuilder(
-                                activeColor: Colors.blue,
-                                color: Colors.white,
-                                size: 8.0,
-                                activeSize: 10.0,
                               ),
-                            ),
-                            autoplay: true,
-                            autoplayDelay: 5000,
+
+                              // Content
+                              Positioned(
+                                bottom: 20.h,
+                                left: 20.w,
+                                right: 20.w,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      photo.title,
+                                      style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      photo.cityName,
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    // Details button
+                                    ElevatedButton.icon(
+                                      onPressed: () => _showPhotoDetails(photo),
+                                      icon: const Icon(
+                                        Icons.info_outline,
+                                        size: 20,
+                                      ),
+                                      label: const Text('View Details'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: Colors.black,
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 16.w,
+                                          vertical: 8.h,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            20.r,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 12.h),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
+                      );
+                    },
+                    pagination: SwiperPagination(
+                      alignment: Alignment.bottomCenter,
+                      margin: EdgeInsets.only(bottom: 10.h),
+                      builder: DotSwiperPaginationBuilder(
+                        activeColor: Colors.blue,
+                        color: Colors.white,
+                        size: 8.0,
+                        activeSize: 10.0,
+                      ),
+                    ),
+                    autoplay: true,
+                    autoplayDelay: 5000,
+                  ),
           ),
         ],
       ),

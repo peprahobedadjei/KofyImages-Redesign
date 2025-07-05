@@ -21,8 +21,8 @@ class SideDrawer extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.deepPurple.shade400,
-                  Colors.deepPurple.shade600,
+                  Colors.black,
+                  Colors.black,
                 ],
               ),
             ),
@@ -86,7 +86,7 @@ class SideDrawer extends StatelessWidget {
                           'Gallery coming soon!',
                           style: GoogleFonts.montserrat(),
                         ),
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: Colors.black,
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -103,7 +103,7 @@ class SideDrawer extends StatelessWidget {
                           'Favorites coming soon!',
                           style: GoogleFonts.montserrat(),
                         ),
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: Colors.black,
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -120,7 +120,7 @@ class SideDrawer extends StatelessWidget {
                           'Downloads coming soon!',
                           style: GoogleFonts.montserrat(),
                         ),
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: Colors.black,
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -150,7 +150,7 @@ class SideDrawer extends StatelessWidget {
                           'Settings coming soon!',
                           style: GoogleFonts.montserrat(),
                         ),
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: Colors.black,
                         behavior: SnackBarBehavior.floating,
                       ),
                     );

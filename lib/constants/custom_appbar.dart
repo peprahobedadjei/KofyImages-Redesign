@@ -43,9 +43,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ConnectionListener(
-                            child: EmptyCartPage(),
-                          ),
+                          builder: (_) =>
+                              const ConnectionListener(child: EmptyCartPage()),
                         ),
                       );
                     },
@@ -73,19 +72,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                               height: 16.h,
                               padding: EdgeInsets.symmetric(horizontal: 4.w),
                               decoration: BoxDecoration(
-                                color: Colors.red,
+                                // color: Colors.red,
                                 borderRadius: BorderRadius.circular(8.r),
                               ),
-                              child: Center(
-                                child: Text(
-                                  '10', // You can make this dynamic later
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+                              // child: Center(
+                              //   child: Text(
+                              //     '0', // You can make this dynamic later
+                              //     style: TextStyle(
+                              //       color: Colors.white,
+                              //       fontSize: 10.sp,
+                              //       fontWeight: FontWeight.bold,
+                              //     ),
+                              //   ),
+                              // ),
                             ),
                           ),
                         ],

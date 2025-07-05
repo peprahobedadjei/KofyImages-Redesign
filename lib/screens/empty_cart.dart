@@ -90,13 +90,13 @@ class EmptyCartPage extends StatelessWidget {
                         'Shop feature coming soon!',
                         style: GoogleFonts.montserrat(),
                       ),
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: Colors.black,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 16.h),
                   shape: RoundedRectangleBorder(
@@ -135,7 +135,7 @@ class EmptyCartPage extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
-                    color: Colors.deepPurple,
+                    color: Colors.black,
                   ),
                 ),
               ),

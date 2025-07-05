@@ -262,7 +262,7 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                       padding: EdgeInsets.all(40.h),
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.deepPurple,
+                          Colors.black,
                         ),
                       ),
                     ),
@@ -274,11 +274,11 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 48.sp,
-                            color: Colors.red,
-                          ),
+                        Icon(
+                          Icons.error_outline,
+                          size: 50.sp,
+                          color: Colors.grey,
+                        ),
                           SizedBox(height: 8.h),
                           Text(
                             'Failed to load cities',
@@ -307,7 +307,7 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                               _loadCities();
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
+                              backgroundColor: Colors.black,
                               foregroundColor: Colors.white,
                             ),
                             child: Text(

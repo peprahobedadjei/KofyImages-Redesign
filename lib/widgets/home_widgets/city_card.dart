@@ -23,7 +23,7 @@ class VerticalCityCard extends StatelessWidget {
               'Tapped on ${city.formattedName}',
               style: GoogleFonts.montserrat(),
             ),
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Colors.black,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -54,7 +54,7 @@ class VerticalCityCard extends StatelessWidget {
                       child: CircularProgressIndicator(
                         strokeWidth: 2.0,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.deepPurple,
+                          Colors.black,
                         ),
                       ),
                     ),

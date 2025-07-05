@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
               displayColor: Colors.black,
             ),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
+              seedColor: Colors.black,
               brightness: Brightness.light,
             ).copyWith(
               surface: Colors.white,
