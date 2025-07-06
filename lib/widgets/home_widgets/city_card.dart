@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:kofyimages/constants/connection_listener.dart';
 import 'package:kofyimages/models/city_model.dart';
+import 'package:kofyimages/screens/city_detail_page.dart';
 
 class VerticalCityCard extends StatelessWidget {
   final City city;
@@ -16,15 +18,12 @@ class VerticalCityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Handle city tap - navigate to city details
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Tapped on ${city.formattedName}',
-              style: GoogleFonts.montserrat(),
-            ),
-            backgroundColor: Colors.black,
-            behavior: SnackBarBehavior.floating,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ConnectionListener(child: CityDetailPage(
+              cityName: city.cityPart,
+            ))        ,
           ),
         );
       },
