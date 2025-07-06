@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:kofyimages/screens/empty_cart.dart';
+import 'package:kofyimages/screens/cart.dart';
 import 'package:kofyimages/constants/connection_listener.dart';
+import 'package:kofyimages/screens/home.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -27,11 +28,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Logo on the left
-              SizedBox(
-                width: 100.w,
-                height: 150.h,
-                child: Image.asset('assets/logo_white.JPG', fit: BoxFit.cover),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          const ConnectionListener(child: MyHomePage()),
+                    ),
+                  );
+                },
+                child: SizedBox(
+                  width: 100.w,
+                  height: 150.h,
+                  child: Image.asset(
+                    'assets/logo_white.JPG',
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
 
               // Icons on the right
@@ -44,7 +58,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) =>
-                              const ConnectionListener(child: EmptyCartPage()),
+                              const ConnectionListener(child: CartPage()),
                         ),
                       );
                     },

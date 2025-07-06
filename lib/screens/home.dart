@@ -23,15 +23,14 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _searchQuery = query;
     });
-    
+
     // Scroll to cities section
     _scrollToCitiesSection();
   }
 
   void _scrollToCitiesSection() {
+    final targetPosition = 400.h + 220.h + 190.h;
 
-    final targetPosition = 400.h +220.h+ 190.h; 
-    
     _scrollController.animateTo(
       targetPosition,
       duration: const Duration(milliseconds: 800),
@@ -60,15 +59,15 @@ class _MyHomePageState extends State<MyHomePage> {
               slivers: [
                 // Hero Section
                 SliverToBoxAdapter(
-                  child: HeroSection(
-                    onSearchSubmitted: _onSearchSubmitted,
-                  ),
+                  child: HeroSection(onSearchSubmitted: _onSearchSubmitted),
                 ),
                 const SliverToBoxAdapter(child: PhotosOfWeekWidget()),
                 SliverToBoxAdapter(
                   child: CitiesWidget(
                     key: _citiesWidgetKey,
                     searchQuery: _searchQuery,
+                    parentScrollController:
+                        _scrollController, // Pass the scroll controller
                   ),
                 ),
               ],

@@ -7,8 +7,13 @@ import 'package:kofyimages/widgets/home_widgets/city_card.dart';
 
 class CitiesWidget extends StatefulWidget {
   final String searchQuery;
-  
-  const CitiesWidget({super.key, this.searchQuery = ''});
+  final ScrollController? parentScrollController; // Add this parameter
+
+  const CitiesWidget({
+    super.key,
+    this.searchQuery = '',
+    this.parentScrollController, // Add this parameter
+  });
 
   @override
   State<CitiesWidget> createState() => _CitiesWidgetState();
@@ -62,10 +67,12 @@ class _CitiesWidgetState extends State<CitiesWidget> {
         filteredCities = List.from(allCities);
       } else {
         filteredCities = allCities.where((city) {
-          return city.name.toLowerCase().contains(widget.searchQuery.toLowerCase());
+          return city.formattedName.toLowerCase().contains(
+            widget.searchQuery.toLowerCase(),
+          );
         }).toList();
       }
-      
+
       // Reset to first page when filtering
       currentPage = 1;
       totalPages = (filteredCities.length / citiesPerPage).ceil();
@@ -75,8 +82,25 @@ class _CitiesWidgetState extends State<CitiesWidget> {
 
   void _updateCurrentPageCities() {
     final startIndex = (currentPage - 1) * citiesPerPage;
-    final endIndex = (startIndex + citiesPerPage).clamp(0, filteredCities.length);
+    final endIndex = (startIndex + citiesPerPage).clamp(
+      0,
+      filteredCities.length,
+    );
     currentPageCities = filteredCities.sublist(startIndex, endIndex);
+  }
+
+  // Add this method to scroll to cities section
+  void _scrollToCitiesSection() {
+    if (widget.parentScrollController != null) {
+      final targetPosition =
+          400.h + 220.h + 190.h; // Same position as in MyHomePage
+
+      widget.parentScrollController!.animateTo(
+        targetPosition,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _goToPage(int page) {
@@ -85,6 +109,9 @@ class _CitiesWidgetState extends State<CitiesWidget> {
         currentPage = page;
         _updateCurrentPageCities();
       });
+
+      // Scroll to cities section after changing page
+      _scrollToCitiesSection();
     }
   }
 
@@ -195,22 +222,18 @@ class _CitiesWidgetState extends State<CitiesWidget> {
 
   Widget _buildSearchResultsHeader() {
     if (widget.searchQuery.isEmpty) return const SizedBox.shrink();
-    
+
     return Container(
       padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
         children: [
-          Icon(
-            Icons.search,
-            size: 20.sp,
-            color: Colors.grey[600],
-          ),
+          Icon(Icons.search, size: 20.sp, color: Colors.grey[600]),
           SizedBox(width: 8.w),
           Text(
             '${filteredCities.length} ${filteredCities.length == 1 ? 'city' : 'cities'}',
             style: GoogleFonts.montserrat(
               fontSize: 14.sp,
-               fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w600,
               color: Colors.grey[600],
             ),
           ),
@@ -261,9 +284,7 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                     child: Padding(
                       padding: EdgeInsets.all(40.h),
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.black,
-                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                       ),
                     ),
                   )
@@ -274,11 +295,11 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 50.sp,
-                          color: Colors.grey,
-                        ),
+                          Icon(
+                            Icons.error_outline,
+                            size: 50.sp,
+                            color: Colors.grey,
+                          ),
                           SizedBox(height: 8.h),
                           Text(
                             'Failed to load cities',
@@ -335,9 +356,9 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                           ),
                           SizedBox(height: 16.h),
                           Text(
-                            widget.searchQuery.isEmpty 
+                            widget.searchQuery.isEmpty
                                 ? 'No cities available'
-                                : 'No cities found for "${widget.searchQuery}"',
+                                : 'City not found for "${widget.searchQuery}"',
                             style: GoogleFonts.montserrat(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w500,
@@ -348,7 +369,7 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                           if (widget.searchQuery.isNotEmpty) ...[
                             SizedBox(height: 8.h),
                             Text(
-                              'Try a different search term',
+                              'Search another city',
                               style: GoogleFonts.montserrat(
                                 fontSize: 14.sp,
                                 color: Colors.grey[500],
