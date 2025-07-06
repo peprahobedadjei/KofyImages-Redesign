@@ -37,15 +37,13 @@ class _CityDetailPageState extends State<CityDetailPage> {
       });
       
       final details = await GetCityDetailsService.getCityDetails(widget.cityName);
-      print('Loaded city details for: ${widget.cityName}');
-      print('Categories count: ${details.categories.length}');
+
       
       setState(() {
         cityDetail = details;
         isLoading = false;
       });
     } catch (e) {
-      print('Error loading city details: ${e.toString()}');
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
@@ -193,8 +191,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withOpacity(0.3),
-                        Colors.black.withOpacity(0.7),
+Color.fromARGB(77, 0, 0, 0),  
+Color.fromARGB(179, 0, 0, 0), 
                       ],
                     ),
                   ),
@@ -224,7 +222,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                         style: GoogleFonts.montserrat(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Color.fromARGB(230, 255, 255, 255),
                           height: 1.4,
                         ),
                       ),
@@ -260,7 +258,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                           Container(
                             padding: EdgeInsets.all(12.w),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Color.fromARGB(51, 255, 255, 255),
                               borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Icon(
@@ -386,7 +384,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+             color: Color.fromARGB(26, 0, 0, 0),  
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -435,7 +433,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.7),
+                     Color.fromARGB(179, 0, 0, 0),  
                     ],
                   ),
                 ),
@@ -462,7 +460,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
                       style: GoogleFonts.montserrat(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
-                        color: Colors.white.withOpacity(0.8),
+                       color: Color.fromARGB(204, 255, 255, 255),
                       ),
                     ),
                   ],
