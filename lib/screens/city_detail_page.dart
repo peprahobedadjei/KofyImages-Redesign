@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:kofyimages/constants/custom_appbar.dart';
+import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/city_details_model.dart';
 import 'package:kofyimages/services/get_city_details.dart';
+import 'package:kofyimages/widgets/footer/footer_widget.dart';
 
 class CityDetailPage extends StatefulWidget {
   final String cityName;
@@ -54,7 +57,10 @@ class _CityDetailPageState extends State<CityDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+        appBar: const CustomAppBar(),
+        backgroundColor: Colors.grey[50],
+        drawer: const SideDrawer(),
+
       body: isLoading
           ? const Center(
               child: CircularProgressIndicator(
@@ -64,6 +70,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
           : errorMessage.isNotEmpty
               ? _buildErrorWidget()
               : _buildCityDetailContent(),
+              
     );
   }
 
@@ -310,6 +317,9 @@ Color.fromARGB(179, 0, 0, 0),
             ),
           ),
         ),
+                                        const SliverToBoxAdapter(
+                  child: FooterWidget(),
+                ),
       ],
     );
   }
