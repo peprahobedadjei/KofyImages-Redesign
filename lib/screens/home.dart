@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:kofyimages/widgets/footer/footer_widget.dart';
 import 'package:kofyimages/widgets/home_widgets/cities_widget.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/widgets/home_widgets/mainhero_section.dart';
@@ -69,6 +70,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     parentScrollController:
                         _scrollController, // Pass the scroll controller
                   ),
+                ),
+                                const SliverToBoxAdapter(
+                  child: FooterWidget(),
                 ),
               ],
             ),
