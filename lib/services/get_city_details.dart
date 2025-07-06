@@ -19,7 +19,6 @@ class GetCityDetailsService {
         final Map<String, dynamic> data = json.decode(response.body);
         return CityDetail.fromJson(data);
       } else {
-        print(response.statusCode);
         throw Exception('Failed to load city details: ${response.statusCode}');
       }
     } catch (e) {
