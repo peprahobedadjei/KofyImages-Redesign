@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/city_details_model.dart';
+import 'package:kofyimages/screens/category_detail_page.dart';
 import 'package:kofyimages/services/get_city_details.dart';
 import 'package:kofyimages/widgets/footer/footer_widget.dart';
 
@@ -377,18 +378,13 @@ Color.fromARGB(179, 0, 0, 0),
 
   Widget _buildCategoryCard(Category category) {
     return GestureDetector(
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Tapped on ${category.nameDisplay.isNotEmpty ? category.nameDisplay : category.name}',
-              style: GoogleFonts.montserrat(),
-            ),
-            backgroundColor: Colors.black,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
+onTap: () {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => CategoryDetailPage(category: category, cityDetail:cityDetail),
+    ),
+  );
+},
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.r),
