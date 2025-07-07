@@ -88,10 +88,6 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                     height: 500.h,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    memCacheWidth: 800, // Add this
-                    memCacheHeight: 600, // Add this
-                    maxWidthDiskCache: 1000, // Add this
-                    maxHeightDiskCache: 800, // Add this
                     placeholder: (context, url) => Container(
                       height: 200.h,
                       color: Colors.grey[200],
@@ -280,10 +276,10 @@ class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
                                   height: double.infinity,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
-                                  memCacheWidth: 800, // Add this
+                                  memCacheWidth: 400, // Add this
                                   memCacheHeight: 600, // Add this
-                                  maxWidthDiskCache: 1000, // Add this
-                                  maxHeightDiskCache: 800, // Add this
+                                  //  // maxWidthDiskCache: 1000, // Add this // Add this
+                                  // maxHeightDiskCache: 800, // Add this
                                   placeholder: (context, url) => Container(
                                     color: Colors.grey[200],
                                     child: const Center(

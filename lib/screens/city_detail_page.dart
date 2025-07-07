@@ -189,8 +189,8 @@ class _CityDetailPageState extends State<CityDetailPage>
                         fit: BoxFit.cover,
                         memCacheWidth: 800, // Add this
                         memCacheHeight: 600, // Add this
-                        maxWidthDiskCache: 1000, // Add this
-                        maxHeightDiskCache: 800, // Add this
+                        // maxWidthDiskCache: 1000, // Add this // Add this
+                        // maxHeightDiskCache: 800, // Add this
                         placeholder: (context, url) => Container(
                           color: Colors.grey[300],
                           child: Center(
@@ -435,8 +435,8 @@ class _CityDetailPageState extends State<CityDetailPage>
                       fit: BoxFit.cover,
                       memCacheWidth: 800, // Add this
                       memCacheHeight: 600, // Add this
-                      maxWidthDiskCache: 1000, // Add this
-                      maxHeightDiskCache: 800, // Add this
+                      // maxWidthDiskCache: 1000, // Add this // Add this
+                      // maxHeightDiskCache: 800, // Add this
                       placeholder: (context, url) => Container(
                         color: Colors.grey[300],
                         child: Center(

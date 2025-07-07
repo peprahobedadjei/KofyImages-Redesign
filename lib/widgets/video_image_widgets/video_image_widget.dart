@@ -72,8 +72,8 @@ class VideoImageWidget extends StatelessWidget {
                   fit: BoxFit.cover,
                   memCacheWidth: 800, // Add this
                   memCacheHeight: 600, // Add this
-                  maxWidthDiskCache: 1000, // Add this
-                  maxHeightDiskCache: 800, // Add this
+                  // maxWidthDiskCache: 1000, // Add this // Add this
+                  // maxHeightDiskCache: 800, // Add this
                   placeholder: (_, __) => Container(
                     height: 200.h,
                     color: Colors.grey[300],
