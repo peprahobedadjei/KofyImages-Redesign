@@ -10,6 +10,8 @@ import 'package:kofyimages/widgets/article_widgets/article_widget.dart';
 import 'package:kofyimages/widgets/footer/footer_widget.dart';
 import 'dart:async';
 
+import 'package:kofyimages/widgets/video_image_widgets/video_image_widget.dart';
+
 class CategoryDetailPage extends StatefulWidget {
   final Category category;
   final CityDetail? cityDetail;
@@ -202,7 +204,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Placeholder for other categories
+                          VideoImageWidget(content: widget.category.content),
                       ],
                     ),
                   ),
@@ -211,6 +213,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
             ),
           ),
         ),
+
         const SliverToBoxAdapter(child: FooterWidget()),
       ],
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:kofyimages/constants/connection_listener.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/city_details_model.dart';
@@ -381,7 +382,7 @@ Color.fromARGB(179, 0, 0, 0),
 onTap: () {
   Navigator.of(context).push(
     MaterialPageRoute(
-      builder: (_) => CategoryDetailPage(category: category, cityDetail:cityDetail),
+      builder: (_) => ConnectionListener(child:CategoryDetailPage(category: category, cityDetail:cityDetail)),
     ),
   );
 },
