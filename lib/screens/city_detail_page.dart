@@ -14,41 +14,69 @@ import 'package:kofyimages/widgets/footer/footer_widget.dart';
 class CityDetailPage extends StatefulWidget {
   final String cityName;
 
-  const CityDetailPage({
-    super.key,
-    required this.cityName,
-  });
+  const CityDetailPage({super.key, required this.cityName});
 
   @override
   State<CityDetailPage> createState() => _CityDetailPageState();
 }
 
-class _CityDetailPageState extends State<CityDetailPage> {
+class _CityDetailPageState extends State<CityDetailPage>
+    with WidgetsBindingObserver {
   CityDetail? cityDetail;
   bool isLoading = true;
   String errorMessage = '';
+  bool _disposed = false; // Add this
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _disposed = true; // Add this
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+        // App moved to background - clean up resources
+        break;
+      case AppLifecycleState.resumed:
+        // App resumed - reload if needed
+        if (cityDetail == null && !isLoading) {
+          _loadCityDetails();
+        }
+        break;
+      default:
+        break;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadCityDetails();
   }
 
   Future<void> _loadCityDetails() async {
+    if (_disposed) return; // Add this check
     try {
       setState(() {
         isLoading = true;
         errorMessage = '';
       });
-      
-      final details = await GetCityDetailsService.getCityDetails(widget.cityName);
 
-      
+      final details = await GetCityDetailsService.getCityDetails(
+        widget.cityName,
+      );
+      if (_disposed) return; // Add this check
+
       setState(() {
         cityDetail = details;
         isLoading = false;
       });
     } catch (e) {
+      if (_disposed) return; // Add this check
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
@@ -59,9 +87,9 @@ class _CityDetailPageState extends State<CityDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: const CustomAppBar(),
-        backgroundColor: Colors.grey[50],
-        drawer: const SideDrawer(),
+      appBar: const CustomAppBar(),
+      backgroundColor: Colors.grey[50],
+      drawer: const SideDrawer(),
 
       body: isLoading
           ? const Center(
@@ -70,9 +98,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
               ),
             )
           : errorMessage.isNotEmpty
-              ? _buildErrorWidget()
-              : _buildCityDetailContent(),
-              
+          ? _buildErrorWidget()
+          : _buildCityDetailContent(),
     );
   }
 
@@ -83,11 +110,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64.sp,
-              color: Colors.grey,
-            ),
+            Icon(Icons.error_outline, size: 64.sp, color: Colors.grey),
             SizedBox(height: 16.h),
             Text(
               'Failed to load city details',
@@ -152,11 +175,7 @@ class _CityDetailPageState extends State<CityDetailPage> {
           pinned: true,
           backgroundColor: Colors.black,
           leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-              size: 24.sp,
-            ),
+            icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
             onPressed: () => Navigator.of(context).pop(),
           ),
           flexibleSpace: FlexibleSpaceBar(
@@ -168,11 +187,17 @@ class _CityDetailPageState extends State<CityDetailPage> {
                     ? CachedNetworkImage(
                         imageUrl: cityDetail!.thumbnailUrl,
                         fit: BoxFit.cover,
+                        memCacheWidth: 800, // Add this
+                        memCacheHeight: 600, // Add this
+                        maxWidthDiskCache: 1000, // Add this
+                        maxHeightDiskCache: 800, // Add this
                         placeholder: (context, url) => Container(
                           color: Colors.grey[300],
                           child: Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.black,
+                              ),
                             ),
                           ),
                         ),
@@ -200,8 +225,8 @@ class _CityDetailPageState extends State<CityDetailPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-Color.fromARGB(77, 0, 0, 0),  
-Color.fromARGB(179, 0, 0, 0), 
+                        Color.fromARGB(77, 0, 0, 0),
+                        Color.fromARGB(179, 0, 0, 0),
                       ],
                     ),
                   ),
@@ -215,7 +240,8 @@ Color.fromARGB(179, 0, 0, 0),
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        cityDetail!.cityPart.isNotEmpty && cityDetail!.countryPart.isNotEmpty
+                        cityDetail!.cityPart.isNotEmpty &&
+                                cityDetail!.countryPart.isNotEmpty
                             ? 'The City Of ${cityDetail!.cityPart}, ${cityDetail!.countryPart}'
                             : 'The City Of ${cityDetail!.name}',
                         style: GoogleFonts.montserrat(
@@ -251,7 +277,8 @@ Color.fromARGB(179, 0, 0, 0),
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  cityDetail!.cityPart.isNotEmpty && cityDetail!.countryPart.isNotEmpty
+                                  cityDetail!.cityPart.isNotEmpty &&
+                                          cityDetail!.countryPart.isNotEmpty
                                       ? 'Visit ${cityDetail!.cityPart}'
                                       : 'Visit ${cityDetail!.name}',
                                   style: GoogleFonts.montserrat(
@@ -319,16 +346,14 @@ Color.fromARGB(179, 0, 0, 0),
             ),
           ),
         ),
-                                        const SliverToBoxAdapter(
-                  child: FooterWidget(),
-                ),
+        const SliverToBoxAdapter(child: FooterWidget()),
       ],
     );
   }
 
   Widget _buildCategoriesGrid() {
     final categories = cityDetail!.categories.values.toList();
-    
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -350,11 +375,7 @@ Color.fromARGB(179, 0, 0, 0),
     return Center(
       child: Column(
         children: [
-          Icon(
-            Icons.category_outlined,
-            size: 64.sp,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.category_outlined, size: 64.sp, color: Colors.grey[400]),
           SizedBox(height: 16.h),
           Text(
             'No categories available',
@@ -379,19 +400,24 @@ Color.fromARGB(179, 0, 0, 0),
 
   Widget _buildCategoryCard(Category category) {
     return GestureDetector(
-onTap: () {
-  Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) => ConnectionListener(child:CategoryDetailPage(category: category, cityDetail:cityDetail)),
-    ),
-  );
-},
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ConnectionListener(
+              child: CategoryDetailPage(
+                category: category,
+                cityDetail: cityDetail,
+              ),
+            ),
+          ),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-             color: Color.fromARGB(26, 0, 0, 0),  
+              color: Color.fromARGB(26, 0, 0, 0),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -407,11 +433,17 @@ onTap: () {
                   ? CachedNetworkImage(
                       imageUrl: category.thumbnailUrl,
                       fit: BoxFit.cover,
+                      memCacheWidth: 800, // Add this
+                      memCacheHeight: 600, // Add this
+                      maxWidthDiskCache: 1000, // Add this
+                      maxHeightDiskCache: 800, // Add this
                       placeholder: (context, url) => Container(
                         color: Colors.grey[300],
                         child: Center(
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.black,
+                            ),
                           ),
                         ),
                       ),
@@ -438,10 +470,7 @@ onTap: () {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                     Color.fromARGB(179, 0, 0, 0),  
-                    ],
+                    colors: [Colors.transparent, Color.fromARGB(179, 0, 0, 0)],
                   ),
                 ),
               ),
@@ -454,7 +483,9 @@ onTap: () {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      category.nameDisplay.isNotEmpty ? category.nameDisplay : category.name,
+                      category.nameDisplay.isNotEmpty
+                          ? category.nameDisplay
+                          : category.name,
                       style: GoogleFonts.montserrat(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -467,7 +498,7 @@ onTap: () {
                       style: GoogleFonts.montserrat(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
-                       color: Color.fromARGB(204, 255, 255, 255),
+                        color: Color.fromARGB(204, 255, 255, 255),
                       ),
                     ),
                   ],

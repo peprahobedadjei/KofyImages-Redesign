@@ -70,6 +70,10 @@ class VideoImageWidget extends StatelessWidget {
                   height: 200.h,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  memCacheWidth: 800, // Add this
+                  memCacheHeight: 600, // Add this
+                  maxWidthDiskCache: 1000, // Add this
+                  maxHeightDiskCache: 800, // Add this
                   placeholder: (_, __) => Container(
                     height: 200.h,
                     color: Colors.grey[300],
@@ -147,7 +151,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    
+
     _controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
       flags: const YoutubePlayerFlags(autoPlay: true, mute: false),
@@ -158,9 +162,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
   void dispose() {
     _controller.dispose();
     // Return to portrait orientation when leaving video page
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     super.dispose();
   }
 

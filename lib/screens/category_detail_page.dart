@@ -129,7 +129,8 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
       case 'food':
         return {
           'title': 'Explore cities through restaurants and their foods',
-          'subtitle': 'Best restaurants and their meals in $cityName , $countryName',
+          'subtitle':
+              'Best restaurants and their meals in $cityName , $countryName',
         };
       case 'lifestyle':
         return {
@@ -144,12 +145,12 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
       case 'videography':
         return {
           'title': 'Eclectic Street View Videos of $cityName.',
-          'subtitle': 'Explore through diverse videos for $cityName, $countryName',
+          'subtitle':
+              'Explore through diverse videos for $cityName, $countryName',
         };
       case 'articles':
         return {
-          'title':
-              'Discovering $cityName through Articles.',
+          'title': 'Discovering $cityName through Articles.',
           'subtitle': 'In-depth articles about $cityName, $countryName',
         };
       default:
@@ -195,16 +196,14 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
             child: Column(
               children: [
                 if (widget.category.name.toLowerCase() == 'articles') ...[
-                  ArticleWidget(
-                    content: widget.category.content,
-                  ),
+                  ArticleWidget(content: widget.category.content),
                 ] else ...[
                   Padding(
                     padding: EdgeInsets.all(20.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                          VideoImageWidget(content: widget.category.content),
+                        VideoImageWidget(content: widget.category.content),
                       ],
                     ),
                   ),
@@ -315,6 +314,10 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
+      memCacheWidth: 800, // Add this
+      memCacheHeight: 600, // Add this
+      maxWidthDiskCache: 1000, // Add this
+      maxHeightDiskCache: 800, // Add this
       placeholder: (context, url) => Container(
         color: Colors.grey[300],
         child: Center(
@@ -357,8 +360,8 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-           const Color.fromARGB(77, 0, 0, 0),
-            const Color.fromARGB(179, 0, 0, 0)
+            const Color.fromARGB(77, 0, 0, 0),
+            const Color.fromARGB(179, 0, 0, 0),
           ],
         ),
       ),
@@ -403,7 +406,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 Shadow(
                   offset: Offset(0, 1),
                   blurRadius: 3,
-                  color: const Color.fromARGB(230, 255, 255, 255)
+                  color: const Color.fromARGB(230, 255, 255, 255),
                 ),
               ],
             ),

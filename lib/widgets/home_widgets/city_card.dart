@@ -8,11 +8,8 @@ import 'package:kofyimages/screens/city_detail_page.dart';
 
 class VerticalCityCard extends StatelessWidget {
   final City city;
-  
-  const VerticalCityCard({
-    super.key,
-    required this.city,
-  });
+
+  const VerticalCityCard({super.key, required this.city});
 
   @override
   Widget build(BuildContext context) {
@@ -21,17 +18,15 @@ class VerticalCityCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ConnectionListener(child: CityDetailPage(
-              cityName: city.cityPart,
-            ))        ,
+            builder: (context) => ConnectionListener(
+              child: CityDetailPage(cityName: city.cityPart),
+            ),
           ),
         );
       },
       child: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
+        decoration: BoxDecoration(color: Colors.white),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -47,14 +42,16 @@ class VerticalCityCard extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: city.thumbnailUrl,
                   fit: BoxFit.cover,
+                  memCacheWidth: 800, // Add this
+                  memCacheHeight: 600, // Add this
+                  maxWidthDiskCache: 1000, // Add this
+                  maxHeightDiskCache: 800, // Add this
                   placeholder: (context, url) => Container(
                     color: Colors.grey[200],
                     child: Center(
                       child: CircularProgressIndicator(
                         strokeWidth: 2.0,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.black,
-                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                       ),
                     ),
                   ),
@@ -82,7 +79,7 @@ class VerticalCityCard extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // City name and country
             Padding(
               padding: EdgeInsets.all(16.w),
