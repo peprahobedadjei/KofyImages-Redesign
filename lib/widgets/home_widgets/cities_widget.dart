@@ -387,7 +387,7 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                         children: currentPageCities.map((city) {
                           return Padding(
                             padding: EdgeInsets.only(bottom: 16.h),
-                            child: VerticalCityCard(city: city),
+                            child: VerticalCityCard(city: city,),
                           );
                         }).toList(),
                       ),

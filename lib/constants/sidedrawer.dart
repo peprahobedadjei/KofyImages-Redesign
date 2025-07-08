@@ -140,6 +140,7 @@ class SideDrawer extends StatelessWidget {
                             onTap: () async {
                               await AuthLoginService.logout();
                               Navigator.pushAndRemoveUntil(
+                                // ignore: use_build_context_synchronously
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => const LoginPage(),

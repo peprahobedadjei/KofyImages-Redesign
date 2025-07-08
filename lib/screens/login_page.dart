@@ -146,7 +146,6 @@ class _LoginPageState extends State<LoginPage> {
 
   /// Handle forgot password
   void _handleForgotPassword() {
-    // TODO: Implement forgot password functionality
     _showSnackBar('Forgot password feature coming soon!');
   }
 

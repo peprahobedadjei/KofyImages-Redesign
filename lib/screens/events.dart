@@ -50,7 +50,6 @@ class _EventsPageState extends State<EventsPage> {
         isLoading = false;
         hasError = true;
       });
-      print('Error loading events: $e');
     }
   }
 

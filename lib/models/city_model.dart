@@ -8,6 +8,7 @@ class City {
   final String countryPart;
   final int reviewsCount;
   final int likesCount;
+  final bool isReviewed;
   final bool isLiked;
   final String createdAt;
 
@@ -22,6 +23,7 @@ class City {
     required this.reviewsCount,
     required this.likesCount,
     required this.isLiked,
+    required this.isReviewed,
     required this.createdAt,
   });
 
@@ -37,6 +39,7 @@ class City {
       reviewsCount: json['reviews_count'] ?? 0,
       likesCount: json['likes_count'] ?? 0,
       isLiked: json['is_liked'] ?? false,
+      isReviewed: json['isReviewed'] ?? false,
       createdAt: json['created_at'] ?? '',
     );
   }
@@ -53,6 +56,7 @@ class City {
       'reviews_count': reviewsCount,
       'likes_count': likesCount,
       'is_liked': isLiked,
+      'isReviewed': isReviewed,
       'created_at': createdAt,
     };
   }

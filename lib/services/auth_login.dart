@@ -83,6 +83,7 @@ class AuthLoginService {
   static Future<LoginResponse> registerAndLogin(RegisterRequest request) async {
     try {
       // First, register the user
+      // ignore: unused_local_variable
       final registerResponse = await register(request);
       
       // If registration successful, automatically login
