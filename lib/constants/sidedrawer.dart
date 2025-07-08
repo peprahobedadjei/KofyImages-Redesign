@@ -37,7 +37,7 @@ class SideDrawer extends StatelessWidget {
                       children: [
                         SizedBox(
                           width: 300.w,
-                          height: 150.h,
+                          height: 120.h,
                           child: Image.asset(
                             'assets/logo_white.JPG',
                             fit: BoxFit.contain,
