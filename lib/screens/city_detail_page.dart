@@ -262,49 +262,49 @@ class _CityDetailPageState extends State<CityDetailPage>
                         ),
                       ),
                       SizedBox(height: 20.h),
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 20.w,
-                              vertical: 12.h,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white, width: 2),
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  cityDetail!.cityPart.isNotEmpty &&
-                                          cityDetail!.countryPart.isNotEmpty
-                                      ? 'Visit ${cityDetail!.cityPart}'
-                                      : 'Visit ${cityDetail!.name}',
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Container(
-                            padding: EdgeInsets.all(12.w),
-                            decoration: BoxDecoration(
-                              color: Color.fromARGB(51, 255, 255, 255),
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Icon(
-                              Icons.favorite_border,
-                              color: Colors.white,
-                              size: 20.sp,
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Container(
+                      //       padding: EdgeInsets.symmetric(
+                      //         horizontal: 20.w,
+                      //         vertical: 12.h,
+                      //       ),
+                      //       decoration: BoxDecoration(
+                      //         border: Border.all(color: Colors.white, width: 2),
+                      //         borderRadius: BorderRadius.circular(8.r),
+                      //       ),
+                      //       child: Row(
+                      //         mainAxisSize: MainAxisSize.min,
+                      //         children: [
+                      //           Text(
+                      //             cityDetail!.cityPart.isNotEmpty &&
+                      //                     cityDetail!.countryPart.isNotEmpty
+                      //                 ? 'Visit ${cityDetail!.cityPart}'
+                      //                 : 'Visit ${cityDetail!.name}',
+                      //             style: GoogleFonts.montserrat(
+                      //               fontSize: 14.sp,
+                      //               fontWeight: FontWeight.w600,
+                      //               color: Colors.white,
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //     SizedBox(width: 12.w),
+                      //     Container(
+                      //       padding: EdgeInsets.all(12.w),
+                      //       decoration: BoxDecoration(
+                      //         color: Color.fromARGB(51, 255, 255, 255),
+                      //         borderRadius: BorderRadius.circular(8.r),
+                      //       ),
+                      //       child: Icon(
+                      //         Icons.favorite_border,
+                      //         color: Colors.white,
+                      //         size: 20.sp,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ),

@@ -262,16 +262,16 @@ class FooterWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Copyright
-              Expanded(
-                child: Text(
-                  '©2025.KofyImages.All rights reserved',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey[400],
-                  ),
-                ),
-              ),
+Expanded(
+  child: Text(
+    '©${DateTime.now().year}.KofyImages.All rights reserved',
+    style: GoogleFonts.montserrat(
+      fontSize: 12.sp,
+      fontWeight: FontWeight.w400,
+      color: Colors.grey[400],
+    ),
+  ),
+),
 
               Row(
                 children: [

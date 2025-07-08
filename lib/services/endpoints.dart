@@ -3,8 +3,11 @@ class ApiEndpoints {
   
   // Cities endpoints
   static const String getAllCities = '$baseUrl/api/cities/';
+  static const String getAllEvents = '$baseUrl/api/events/';
+   static const String refreshToken = '$baseUrl/api/token/refresh/';
+    static const String login = '$baseUrl/api/token/';
+    static const String register = '$baseUrl/api/register/';
   static const String getAllPhotosOfTheWeek = '$baseUrl/api/lifestyle-photos/photos-of-week/';
-  static const String getAllHeroPictures = '$baseUrl/api/city_photos/';
   static String getCityDetails(String cityName) => '$baseUrl/api/cities/$cityName/content/';
   static String getCityDetailsPhotos(String cityName) => '$baseUrl/api/city_photos/$cityName/';
 
