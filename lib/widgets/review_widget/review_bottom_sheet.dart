@@ -158,7 +158,14 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+              border: Border.all(color: Colors.grey[700]!),
+borderRadius: BorderRadius.only(
+  topLeft: Radius.circular(20.r),
+  topRight: Radius.circular(20.r),
+),
+      ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
         top: 16.h,
