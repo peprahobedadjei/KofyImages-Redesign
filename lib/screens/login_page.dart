@@ -6,6 +6,7 @@ import 'package:kofyimages/constants/connection_listener.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/login_model.dart';
+import 'package:kofyimages/screens/forgot_password_page.dart';
 import 'package:kofyimages/screens/home.dart';
 import 'package:kofyimages/screens/register.dart';
 import 'package:kofyimages/services/auth_login.dart';
@@ -134,19 +135,22 @@ class _LoginPageState extends State<LoginPage> {
 
   /// Navigate to registration page
   void _navigateToRegistration() {
-                                 Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ConnectionListener(
-                                    child: RegistrationPage(),
-                                  ),
-                                ),
-                              );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ConnectionListener(child: RegistrationPage()),
+      ),
+    );
   }
 
   /// Handle forgot password
   void _handleForgotPassword() {
-    _showSnackBar('Forgot password feature coming soon!');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ConnectionListener(child: ForgotPasswordPage()),
+      ),
+    );
   }
 
   @override

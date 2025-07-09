@@ -1,5 +1,7 @@
 // widgets/login_modal.dart
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,11 +13,11 @@ class LoginModal extends StatelessWidget {
   final VoidCallback? onRegisterPressed;
 
   const LoginModal({
-    Key? key,
+    super.key,
     required this.cityName,
     this.onLoginPressed,
     this.onRegisterPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,7 @@ class LoginModal extends StatelessWidget {
             
             // Title
             Text(
-              'Login to Like ${cityName}',
+              'Login to Like $cityName',
               style: GoogleFonts.montserrat(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
