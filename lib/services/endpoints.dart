@@ -2,6 +2,8 @@ class ApiEndpoints {
   static const String baseUrl = 'https://kofyimages-9dae18892c9f.herokuapp.com';
 
   // Cities endpoints
+  static const String postphoto = '$baseUrl /api/lifestyle-photos/';
+    static const String getAllCities = '$baseUrl/api/cities/';
       static const String forgottenpassword = '$baseUrl/api/auth/forgot-password/';
     static String postCityLike(String cityName) =>
       '$baseUrl/api/cities/$cityName/like_city/';
@@ -10,7 +12,6 @@ class ApiEndpoints {
       '$baseUrl/api/cities/$cityName/reviews/';
   static String postCityReviews(String cityName) =>
       '$baseUrl/api/cities/$cityName/add_review/';
-  static const String getAllCities = '$baseUrl/api/cities/';
   static const String getAllEvents = '$baseUrl/api/events/';
   static const String refreshToken = '$baseUrl/api/token/refresh/';
   static const String login = '$baseUrl/api/token/';
