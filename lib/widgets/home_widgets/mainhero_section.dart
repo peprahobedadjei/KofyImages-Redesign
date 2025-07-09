@@ -44,7 +44,6 @@ class _HeroSectionState extends State<HeroSection> {
         }
       }
     } catch (e) {
-      print('Error loading hero images: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -161,7 +160,7 @@ class _HeroSectionState extends State<HeroSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 400.h,
       width: double.infinity,
       child: Stack(

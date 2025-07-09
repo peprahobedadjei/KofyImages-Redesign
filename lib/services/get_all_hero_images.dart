@@ -18,11 +18,9 @@ class HeroImagesService {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
         return HeroImagesResponse.fromJson(jsonResponse);
       } else {
-        print('Error: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Exception occurred: $e');
       return null;
     }
   }
@@ -39,7 +37,6 @@ class HeroImagesService {
       }
       return [];
     } catch (e) {
-      print('Error getting all photos: $e');
       return [];
     }
   }
