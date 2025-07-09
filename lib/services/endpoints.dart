@@ -2,6 +2,8 @@ class ApiEndpoints {
   static const String baseUrl = 'https://kofyimages-9dae18892c9f.herokuapp.com';
 
   // Cities endpoints
+    static String postCityLike(String cityName) =>
+      '$baseUrl/api/cities/$cityName/like_city/';
     static const String getAllHeroImages = '$baseUrl/api/city_photos/';
   static String getCityReviews(String cityName) =>
       '$baseUrl/api/cities/$cityName/reviews/';
