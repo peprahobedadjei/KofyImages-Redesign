@@ -357,7 +357,6 @@ borderRadius: BorderRadius.only(
               ),
             ),
           ],
-              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
         ],
         
       ),
