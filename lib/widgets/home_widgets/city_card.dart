@@ -1,15 +1,19 @@
+// ignore_for_file: unused_local_variable, use_build_context_synchronously
+
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:kofyimages/constants/connection_listener.dart';
+import 'package:kofyimages/constants/login_modal.dart';
 import 'package:kofyimages/models/city_model.dart';
 import 'package:kofyimages/screens/city_detail_page.dart';
+import 'package:kofyimages/screens/login_page.dart';
+import 'package:kofyimages/screens/register.dart';
 import 'package:kofyimages/widgets/review_widget/review_bottom_sheet.dart';
-
-// Import your ReviewBottomSheet here
-// import 'package:kofyimages/widgets/review_bottom_sheet.dart';
+import 'package:kofyimages/services/auth_login.dart';
+import 'package:kofyimages/services/like_city.dart';
 
 class VerticalCityCard extends StatefulWidget {
   final City city;
@@ -21,6 +25,7 @@ class VerticalCityCard extends StatefulWidget {
 
 class _VerticalCityCardState extends State<VerticalCityCard> {
   late City _city;
+  bool _isLiking = false; // Loading state for like operation
 
   @override
   void initState() {
@@ -94,6 +99,157 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
     );
   }
 
+  /// Handle like button tap - only supports liking (no unliking)
+  void _handleLikeTap() async {
+    // If city is already liked, show message and return
+    if (_city.isLiked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'You have already liked this city!',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Check if user is logged in
+    final isLoggedIn = await AuthLoginService.isLoggedIn();
+    
+    if (!isLoggedIn) {
+      // Show login modal if user is not logged in
+      showLoginModal(
+        context,
+        cityName: _city.cityPart,
+        onLoginPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  const ConnectionListener(child: LoginPage()),
+            ),
+          );
+        },
+        onRegisterPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  const ConnectionListener(child: RegistrationPage()),
+            ),
+          );
+        },
+      );
+      return;
+    }
+
+    // If user is logged in and city is not liked, proceed with like
+    if (_isLiking) return; // Prevent multiple requests
+
+    setState(() {
+      _isLiking = true;
+    });
+
+    try {
+      // Like the city
+      final likeResponse = await LikeCityService.likeCity(_city.cityPart);
+
+      // Update UI with successful like
+      setState(() {
+        _city = City(
+          id: _city.id,
+          name: _city.name,
+          country: _city.country,
+          formattedName: _city.formattedName,
+          thumbnailUrl: _city.thumbnailUrl,
+          cityPart: _city.cityPart,
+          countryPart: _city.countryPart,
+          reviewsCount: _city.reviewsCount,
+          likesCount: _city.likesCount + 1,
+          isLiked: true,
+          isReviewed: _city.isReviewed,
+          createdAt: _city.createdAt,
+        );
+      });
+
+      // Show success feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'City liked!',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          duration: Duration(seconds: 1),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+    } catch (e) {
+      // Handle "already liked" error specifically
+      if (e.toString().contains('already liked')) {
+        // Update local state to reflect that the city is already liked
+        setState(() {
+          _city = City(
+            id: _city.id,
+            name: _city.name,
+            country: _city.country,
+            formattedName: _city.formattedName,
+            thumbnailUrl: _city.thumbnailUrl,
+            cityPart: _city.cityPart,
+            countryPart: _city.countryPart,
+            reviewsCount: _city.reviewsCount,
+            likesCount: _city.likesCount,
+            isLiked: true,
+            isReviewed: _city.isReviewed,
+            createdAt: _city.createdAt,
+          );
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'You have already liked this city!',
+              style: GoogleFonts.montserrat(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      } else {
+        // Show generic error message for other errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to like city. Please try again.',
+              style: GoogleFonts.montserrat(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isLiking = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -126,67 +282,73 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
                   fit: StackFit.expand,
                   children: [
                     CachedNetworkImage(
-                  imageUrl: _city.thumbnailUrl,
-                  fit: BoxFit.cover,
-                  memCacheWidth: 800,
-                  memCacheHeight: 600,
-                  placeholder: (context, url) => Container(
-                    color: Colors.grey[200],
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                      ),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[200],
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: Colors.grey[400],
-                          size: 32.sp,
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'Image not available',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 12.sp,
-                            color: Colors.grey[600],
+                      imageUrl: _city.thumbnailUrl,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 800,
+                      memCacheHeight: 600,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[200],
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.black,
+                            ),
                           ),
                         ),
-                      ],
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[200],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.grey[400],
+                              size: 32.sp,
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'Image not available',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 12.sp,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
                     Container(
-      color: Colors.black.withAlpha(76), // Adjust opacity as needed
-    ), 
-                       Positioned(
-          bottom: 100.h,
-          left: 35.w,
-          child: DefaultTextStyle(
-            style: GoogleFonts.montserrat(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: [
-                Shadow(blurRadius: 4, color: Colors.black45, offset: Offset(1, 1)),
-              ],
-            ),
-            child: AnimatedTextKit(
-              repeatForever: true,
-              pause: Duration(milliseconds: 1000),
-              animatedTexts: [
-                RotateAnimatedText('Explore ${_city.cityPart} →'),
-              ],
-            ),
-          ),
-        ),
+                      color: Colors.black.withAlpha(30),
+                    ),
+                    Positioned(
+                      bottom: 100.h,
+                      left: 35.w,
+                      child: DefaultTextStyle(
+                        style: GoogleFonts.montserrat(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 4,
+                              color: Colors.black45,
+                              offset: Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                        child: AnimatedTextKit(
+                          repeatForever: true,
+                          pause: Duration(milliseconds: 1000),
+                          animatedTexts: [
+                            RotateAnimatedText('Explore ${_city.cityPart} →'),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
-                )
+                ),
               ),
             ),
             // City name and interactions
@@ -210,26 +372,50 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
                   // Like and comment section
                   Row(
                     children: [
-                      // Like button (Instagram style)
+                      // Like button (only liking, no unliking)
                       GestureDetector(
-                        onTap: () {
-                          // Handle like action
-                        },
+                        onTap: _handleLikeTap,
                         child: Row(
                           children: [
-                            Icon(
-                              _city.isLiked ? Icons.favorite : Icons.favorite_border,
-                              color: _city.isLiked ? Colors.red : Colors.black87,
-                              size: 26.sp,
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 200),
+                              transitionBuilder: (Widget child, Animation<double> animation) {
+                                return ScaleTransition(scale: animation, child: child);
+                              },
+                              child: _isLiking
+                                ? SizedBox(
+                                    width: 26.sp,
+                                    height: 26.sp,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.0,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.red,
+                                      ),
+                                    ),
+                                  )
+                                : Icon(
+                                    key: ValueKey(_city.isLiked),
+                                    _city.isLiked
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: _city.isLiked
+                                        ? Colors.red
+                                        : Colors.black87,
+                                    size: 26.sp,
+                                  ),
                             ),
                             if (_city.likesCount > 0) ...[
                               SizedBox(width: 6.w),
-                              Text(
-                                _formatCount(_city.likesCount),
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
+                              AnimatedSwitcher(
+                                duration: Duration(milliseconds: 300),
+                                child: Text(
+                                  key: ValueKey(_city.likesCount),
+                                  _formatCount(_city.likesCount),
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
                                 ),
                               ),
                             ],
@@ -237,8 +423,8 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
                         ),
                       ),
                       SizedBox(width: 16.w),
-                      
-                      // Comment button (Instagram style)
+
+                      // Comment button
                       GestureDetector(
                         onTap: _showReviewBottomSheet,
                         child: Row(

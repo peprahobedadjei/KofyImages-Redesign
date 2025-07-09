@@ -7,6 +7,7 @@ import 'package:kofyimages/screens/events.dart';
 import 'package:kofyimages/screens/home.dart';
 import 'package:kofyimages/screens/login_page.dart';
 import 'package:kofyimages/screens/register.dart';
+import 'package:kofyimages/screens/upload_lifestyle_picture.dart';
 import 'package:kofyimages/services/auth_login.dart';
 import 'package:kofyimages/models/login_model.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -121,15 +122,12 @@ class SideDrawer extends StatelessWidget {
                             icon: Icons.upload_outlined,
                             title: 'Upload Photo',
                             onTap: () {
-                              // Replace with actual upload page
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Upload coming soon!',
-                                    style: GoogleFonts.montserrat(),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ConnectionListener(
+                                    child: UploadLifestylePage(),
                                   ),
-                                  backgroundColor: Colors.black,
-                                  behavior: SnackBarBehavior.floating,
                                 ),
                               );
                             },
@@ -151,7 +149,7 @@ class SideDrawer extends StatelessWidget {
                           ),
                         ]
                       : [
-                                                  _buildMenuItem(
+                          _buildMenuItem(
                             icon: Icons.home_outlined,
                             title: 'Home',
                             onTap: () {
@@ -165,7 +163,7 @@ class SideDrawer extends StatelessWidget {
                               );
                             },
                           ),
-                                                    _buildMenuItem(
+                          _buildMenuItem(
                             icon: Icons.event_outlined,
                             title: 'Events',
                             onTap: () {
