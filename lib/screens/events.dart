@@ -466,7 +466,7 @@ class _EventsPageState extends State<EventsPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: const Color.fromARGB(255, 158, 158, 158),
             spreadRadius: 2,
             blurRadius: 8,
             offset: const Offset(0, 3),

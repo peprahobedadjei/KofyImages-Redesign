@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -121,7 +122,10 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12.r),
-                child: CachedNetworkImage(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
                   imageUrl: _city.thumbnailUrl,
                   fit: BoxFit.cover,
                   memCacheWidth: 800,
@@ -157,6 +161,32 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
                     ),
                   ),
                 ),
+                    Container(
+      color: Colors.black.withAlpha(76), // Adjust opacity as needed
+    ), 
+                       Positioned(
+          bottom: 100.h,
+          left: 35.w,
+          child: DefaultTextStyle(
+            style: GoogleFonts.montserrat(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: [
+                Shadow(blurRadius: 4, color: Colors.black45, offset: Offset(1, 1)),
+              ],
+            ),
+            child: AnimatedTextKit(
+              repeatForever: true,
+              pause: Duration(milliseconds: 1000),
+              animatedTexts: [
+                RotateAnimatedText('Explore ${_city.cityPart} →'),
+              ],
+            ),
+          ),
+        ),
+                  ],
+                )
               ),
             ),
             // City name and interactions

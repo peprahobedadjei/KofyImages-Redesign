@@ -357,6 +357,7 @@ borderRadius: BorderRadius.only(
               ),
             ),
           ],
+              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
         ],
         
       ),
@@ -369,13 +370,13 @@ String timeAgo(String? isoDateString) {
   final difference = now.difference(dateTime);
 
   if (difference.inSeconds < 60) {
-    return 'just now';
+    return 'now';
   } else if (difference.inMinutes < 60) {
-    return '${difference.inMinutes} minute${difference.inMinutes == 1 ? '' : 's'} ago';
+    return '${difference.inMinutes} m';
   } else if (difference.inHours < 24) {
-    return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+    return '${difference.inHours} h';
   } else if (difference.inDays < 7) {
-    return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
+    return '${difference.inDays} d';
   } else {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
