@@ -7,7 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:kofyimages/constants/connection_listener.dart';
+import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/login_modal.dart';
+import 'package:kofyimages/constants/sidedrawer.dart';
 import 'dart:convert';
 import 'package:kofyimages/models/city_model.dart';
 import 'package:kofyimages/screens/login_page.dart';
@@ -328,20 +330,9 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const CustomAppBar(),
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: Text(
-          'Upload Lifestyle Photo',
-          style: GoogleFonts.montserrat(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
+      drawer: const SideDrawer(),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
         child: Form(
@@ -349,6 +340,18 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+
+                        Center(
+                  child: Text(
+                   'Upload Lifestyle Photo',
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 24.h),
               // Image Selection Section
               _buildImageSection(),
               SizedBox(height: 24.h),
