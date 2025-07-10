@@ -6,16 +6,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:kofyimages/constants/connection_listener.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/login_modal.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'dart:convert';
 import 'package:kofyimages/models/city_model.dart';
-import 'package:kofyimages/screens/login_page.dart';
-import 'package:kofyimages/screens/register.dart';
 import 'package:kofyimages/services/auth_login.dart';
 import 'package:kofyimages/services/endpoints.dart';
+
 
 class UploadLifestylePage extends StatefulWidget {
   const UploadLifestylePage({super.key});
@@ -98,22 +96,10 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
       context,
       cityName: 'Upload',
       onLoginPressed: () {
-                        Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          const ConnectionListener(child: LoginPage()),
-                    ),
-                  );
+        Navigator.pushReplacementNamed(context, '/login');
       },
       onRegisterPressed: () {
-                        Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          const ConnectionListener(child: RegistrationPage()),
-                    ),
-                  );
+        Navigator.pushReplacementNamed(context, '/register');
       },
     );
   }
@@ -134,8 +120,11 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
         });
       }
     } catch (e) {
-      _showErrorSnackBar('Error picking image: ${e.toString()}');
-      print(e.toString());
+      if (e.toString().contains('channel-error') || e.toString().contains('Unable to establish connection')) {
+        _showErrorSnackBar('Gallery not available in simulator. Please test on a real device or add images to the simulator gallery first.');
+      } else {
+        _showErrorSnackBar('Error picking image: ${e.toString()}');
+      }
     }
   }
 
@@ -258,8 +247,7 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
         setState(() {
           _uploadedImageUrl = responseData['image'];
         });
-        _showSuccessSnackBar('Lifestyle photo uploaded successfully!');
-        _resetForm();
+        _showSuccessModal();
       } else if (response.statusCode == 401) {
         // Token expired, try to refresh
         try {
@@ -307,12 +295,120 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
     _formKey.currentState?.reset();
   }
 
-  void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
+  void _showSuccessModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Success Icon
+              Container(
+                width: 64.w,
+                height: 64.h,
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 32.sp,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              
+              // Success Title
+              Text(
+                'Lifestyle Photo Posted Successfully!',
+                style: GoogleFonts.montserrat(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16.h),
+              
+              // Description
+              Text(
+                'Go to ${_selectedCity?.name}, ${_selectedCity?.country} and you will find your posted picture.',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14.sp,
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24.h),
+              
+              // Action buttons
+              Row(
+                children: [
+                  // Post Another Picture button
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close modal
+                        _resetForm(); // Reset form for new post
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Post Another Picture',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  
+                  // Go Back button
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close modal
+                        Navigator.of(context).pop(); // Go back to previous page
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                          side: BorderSide(color: Colors.grey[300]!),
+                        ),
+                      ),
+                      child: Text(
+                        'Go Back',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -330,8 +426,8 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(),
       backgroundColor: Colors.grey[50],
+      appBar: const CustomAppBar(),
       drawer: const SideDrawer(),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -340,8 +436,7 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-
-                        Center(
+                                      Center(
                   child: Text(
                    'Upload Lifestyle Photo',
                     style: TextStyle(
@@ -363,9 +458,6 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
               // Upload Button
               _buildUploadButton(),
               SizedBox(height: 16.h),
-              
-              // Uploaded Image Preview
-              if (_uploadedImageUrl != null) _buildUploadedImagePreview(),
             ],
           ),
         ),
