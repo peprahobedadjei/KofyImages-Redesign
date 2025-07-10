@@ -1,5 +1,7 @@
 // pages/upload_lifestyle_page.dart
 
+// ignore_for_file: unused_field
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -30,6 +32,7 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
   File? _selectedImage;
   City? _selectedCity;
   List<City> _cities = [];
+  // ignore: prefer_final_fields
   bool _isLoading = false;
   bool _isUploadingImage = false;
   bool _isLoadingCities = false;
@@ -417,7 +420,7 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -436,7 +439,7 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-                                      Center(
+               Center(
                   child: Text(
                    'Upload Lifestyle Photo',
                     style: TextStyle(
@@ -715,62 +718,6 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-    );
-  }
-
-  Widget _buildUploadedImagePreview() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.green[50],
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.green[200]!),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.check_circle,
-            color: Colors.green,
-            size: 48.sp,
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Upload Successful!',
-            style: GoogleFonts.montserrat(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.green[800],
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Your lifestyle photo has been uploaded successfully.',
-            style: GoogleFonts.montserrat(
-              fontSize: 14.sp,
-              color: Colors.green[700],
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 12.h),
-          ElevatedButton(
-            onPressed: _resetForm,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
-            child: Text(
-              'Upload Another Photo',
-              style: GoogleFonts.montserrat(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
