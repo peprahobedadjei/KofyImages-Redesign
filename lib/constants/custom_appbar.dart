@@ -1,8 +1,12 @@
+// constants/custom_appbar.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:kofyimages/constants/cart_notifier.dart';
 import 'package:kofyimages/screens/cart.dart';
 import 'package:kofyimages/constants/connection_listener.dart';
 import 'package:kofyimages/screens/home.dart';
+import 'package:provider/provider.dart';
+// Import your CartNotifier
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -51,59 +55,64 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               // Icons on the right
               Row(
                 children: [
-                  // Cart Icon
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              const ConnectionListener(child: CartPage()),
+                  // Cart Icon with Badge
+                  Consumer<CartNotifier>(
+                    builder: (context, cart, child) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const ConnectionListener(child: CartPage()),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 40.w,
+                          height: 40.h,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Stack(
+                            children: [
+                              Center(
+                                child: Icon(
+                                  Icons.shopping_cart_outlined,
+                                  color: Colors.black,
+                                  size: 24.sp,
+                                ),
+                              ),
+                              // Cart badge
+                              if (cart.totalItems > 0)
+                                Positioned(
+                                  right: 0.w,
+                                  top: 0.h,
+                                  child: Container(
+                                    height: 18.h,
+                                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(9.r),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        cart.totalItems > 99 ? '99+' : cart.totalItems.toString(),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       );
                     },
-                    child: Container(
-                      width: 40.w,
-                      height: 40.h,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: Icon(
-                              Icons.shopping_cart_outlined,
-                              color: Colors.black,
-                              size: 24.sp,
-                            ),
-                          ),
-                          // Cart badge
-                          Positioned(
-                            right: 0.w,
-                            top: 0.h,
-                            child: Container(
-                              height: 16.h,
-                              padding: EdgeInsets.symmetric(horizontal: 4.w),
-                              decoration: BoxDecoration(
-                                // color: Colors.red,
-                                borderRadius: BorderRadius.circular(8.r),
-                              ),
-                              // child: Center(
-                              //   child: Text(
-                              //     '0', // You can make this dynamic later
-                              //     style: TextStyle(
-                              //       color: Colors.white,
-                              //       fontSize: 10.sp,
-                              //       fontWeight: FontWeight.bold,
-                              //     ),
-                              //   ),
-                              // ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
 
                   SizedBox(width: 12.w),

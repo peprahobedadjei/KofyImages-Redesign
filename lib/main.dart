@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kofyimages/constants/cart_notifier.dart';
 import 'package:kofyimages/constants/network_monitor.dart';
 import 'package:kofyimages/screens/splash_screen.dart';
 import 'package:kofyimages/constants/connection_listener.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +23,12 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, __) {
-        return MaterialApp(
+             return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (context) => CartNotifier()),
+            // Add other providers here if needed
+          ],
+          child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'KofyImages',
           theme: ThemeData(
@@ -46,6 +53,7 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
           ),
           home: const ConnectionListener(child: SplashScreen()),
+          )
         );
       },
     );

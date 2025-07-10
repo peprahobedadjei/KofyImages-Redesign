@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kofyimages/constants/connection_listener.dart';
 import 'package:kofyimages/screens/events.dart';
+import 'package:kofyimages/screens/frameshop.dart';
 import 'package:kofyimages/screens/home.dart';
 import 'package:kofyimages/screens/login_page.dart';
 import 'package:kofyimages/screens/register.dart';
@@ -127,6 +128,20 @@ class SideDrawer extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (_) => const ConnectionListener(
                                     child: UploadLifestylePage(),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                            _buildMenuItem(
+                            icon: Icons.image_sharp,
+                            title: 'Buy a Frame ',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ConnectionListener(
+                                    child: FrameShopPage(),
                                   ),
                                 ),
                               );

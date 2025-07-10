@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kofyimages/screens/city_detail_page.dart';
 import 'package:kofyimages/widgets/footer/footer_widget.dart';
+import 'package:kofyimages/widgets/home_widgets/buy_frame.dart';
 import 'package:kofyimages/widgets/home_widgets/cities_widget.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/widgets/home_widgets/mainhero_section.dart';
@@ -152,6 +153,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 // Hero Section
                 SliverToBoxAdapter(
                   child: HeroSection(onSearchSubmitted: _onSearchSubmitted),
+                ),
+                                const SliverToBoxAdapter(
+                  child: BuyaFrameCard(),
                 ),
                 const SliverToBoxAdapter(child: PhotosOfWeekWidget()),
                 SliverToBoxAdapter(

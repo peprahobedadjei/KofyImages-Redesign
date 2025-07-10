@@ -8,6 +8,7 @@ import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/city_details_model.dart';
 import 'package:kofyimages/screens/category_detail_page.dart';
+import 'package:kofyimages/screens/frameshop.dart';
 import 'package:kofyimages/services/get_city_details.dart';
 import 'package:kofyimages/widgets/footer/footer_widget.dart';
 
@@ -25,12 +26,12 @@ class _CityDetailPageState extends State<CityDetailPage>
   CityDetail? cityDetail;
   bool isLoading = true;
   String errorMessage = '';
-  bool _disposed = false; // Add this
+  bool _disposed = false;
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _disposed = true; // Add this
+    _disposed = true;
     super.dispose();
   }
 
@@ -59,7 +60,7 @@ class _CityDetailPageState extends State<CityDetailPage>
   }
 
   Future<void> _loadCityDetails() async {
-    if (_disposed) return; // Add this check
+    if (_disposed) return;
     try {
       setState(() {
         isLoading = true;
@@ -69,14 +70,14 @@ class _CityDetailPageState extends State<CityDetailPage>
       final details = await GetCityDetailsService.getCityDetails(
         widget.cityName,
       );
-      if (_disposed) return; // Add this check
+      if (_disposed) return;
 
       setState(() {
         cityDetail = details;
         isLoading = false;
       });
     } catch (e) {
-      if (_disposed) return; // Add this check
+      if (_disposed) return;
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
@@ -187,10 +188,8 @@ class _CityDetailPageState extends State<CityDetailPage>
                     ? CachedNetworkImage(
                         imageUrl: cityDetail!.thumbnailUrl,
                         fit: BoxFit.cover,
-                        memCacheWidth: 800, // Add this
-                        memCacheHeight: 600, // Add this
-                        // maxWidthDiskCache: 1000, // Add this // Add this
-                        // maxHeightDiskCache: 800, // Add this
+                        memCacheWidth: 800,
+                        memCacheHeight: 600,
                         placeholder: (context, url) => Container(
                           color: Colors.grey[300],
                           child: Center(
@@ -320,11 +319,101 @@ class _CityDetailPageState extends State<CityDetailPage>
         crossAxisSpacing: 16.w,
         mainAxisSpacing: 16.h,
       ),
-      itemCount: categories.length,
+      itemCount: categories.length + 1, // Add 1 for FrameShop
       itemBuilder: (context, index) {
-        final category = categories[index];
-        return _buildCategoryCard(category);
+        if (index < categories.length) {
+          final category = categories[index];
+          return _buildCategoryCard(category);
+        } else {
+          // This is the FrameShop card
+          return _buildFrameShopCard();
+        }
       },
+    );
+  }
+
+  Widget _buildFrameShopCard() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ConnectionListener(
+              child: FrameShopPage(),
+            ),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Color.fromARGB(26, 0, 0, 0),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16.r),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // FrameShop image from assets
+              Image.asset(
+                'assets/frame.jpeg', // Adjust path as needed
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey[300],
+                  child: Icon(
+                    Icons.photo_library,
+                    color: Colors.grey[600],
+                    size: 32.sp,
+                  ),
+                ),
+              ),
+              // Gradient overlay
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Color.fromARGB(179, 0, 0, 0)],
+                  ),
+                ),
+              ),
+              // FrameShop name and item count
+              Positioned(
+                bottom: 16.h,
+                left: 16.w,
+                right: 16.w,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'FrameShop',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      '2 categories', 
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: Color.fromARGB(204, 255, 255, 255),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -390,10 +479,8 @@ class _CityDetailPageState extends State<CityDetailPage>
                   ? CachedNetworkImage(
                       imageUrl: category.thumbnailUrl,
                       fit: BoxFit.cover,
-                      memCacheWidth: 800, // Add this
-                      memCacheHeight: 600, // Add this
-                      // maxWidthDiskCache: 1000, // Add this // Add this
-                      // maxHeightDiskCache: 800, // Add this
+                      memCacheWidth: 800,
+                      memCacheHeight: 600,
                       placeholder: (context, url) => Container(
                         color: Colors.grey[300],
                         child: Center(
