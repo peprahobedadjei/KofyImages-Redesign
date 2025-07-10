@@ -370,7 +370,7 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
                         ),
                       ),
                       child: Text(
-                        'Post Another Picture',
+                        'Post Again',
                         style: GoogleFonts.montserrat(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
