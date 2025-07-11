@@ -1,46 +1,58 @@
-// lib/services/stripe_service.dart
-import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:http/http.dart' as http;
+import 'package:kofyimages/constants/stripe_key.dart';
 
-class StripeService {
-  // Replace with your Stripe publishable key (test key)
-  static const String publishableKey = 'pk_test_your_publishable_key_here';
+final stripePaymentProvider = Provider((ref) => StripePaymentService());
 
-  static init() {
-    Stripe.publishableKey = publishableKey;
-  }
+class StripePaymentService {
+  final Dio _dio = Dio();
 
-  // Create a payment intent using Stripe's test endpoint
-  static Future<Map<String, dynamic>> createPaymentIntent(
-    String amount,
-    String currency,
-  ) async {
+  Future<void> initPaymentSheet({
+    required String amount,
+    required String currency,
+    required String merchantName,
+  }) async {
     try {
-      Map<String, dynamic> body = {
-        'amount': calculateAmount(amount),
-        'currency': currency,
-        'payment_method_types[]': 'card',
-      };
+      final paymentIntent = await _createPaymentIntent(amount, currency);
 
-      var response = await http.post(
-        Uri.parse('https://api.stripe.com/v1/payment_intents'),
-        headers: {
-          'Authorization':
-              'Bearer sk_test_your_secret_key_here', 
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: body,
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: paymentIntent['client_secret'],
+          merchantDisplayName: merchantName,
+          style: ThemeMode.light,
+        ),
       );
-
-      return jsonDecode(response.body);
-    } catch (err) {
-      throw Exception(err.toString());
+    } catch (e) {
+      rethrow;
     }
   }
 
-  static calculateAmount(String amount) {
-    final price = double.parse(amount) * 100; // Convert to cents
-    return price.toInt().toString();
+  Future<void> presentPaymentSheet() async {
+    await Stripe.instance.presentPaymentSheet();
+  }
+
+  Future<Map<String, dynamic>> _createPaymentIntent(
+    String amount,
+    String currency,
+  ) async {
+    final body = {
+      'amount': (int.parse(amount) * 100).toString(),
+      'currency': currency,
+      'payment_method_types[]': 'card',
+    };
+
+    final response = await _dio.post(
+      'https://api.stripe.com/v1/payment_intents',
+      data: body,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $secretKey',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      ),
+    );
+    return response.data;
   }
 }

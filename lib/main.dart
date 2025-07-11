@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    hide ChangeNotifierProvider;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kofyimages/constants/cart_notifier.dart';
 import 'package:kofyimages/constants/network_monitor.dart';
+import 'package:kofyimages/constants/stripe_key.dart';
 import 'package:kofyimages/screens/splash_screen.dart';
 import 'package:kofyimages/constants/connection_listener.dart';
-import 'package:kofyimages/services/stripe_service.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  StripeService.init();
-  await NetworkMonitor.initialize(); // Wait for network status initialization
-  runApp(const MyApp());
+
+  Stripe.publishableKey = publishableKey;
+
+  await NetworkMonitor.initialize();
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -28,7 +34,6 @@ class MyApp extends StatelessWidget {
         return MultiProvider(
           providers: [
             ChangeNotifierProvider(create: (context) => CartNotifier()),
-            // Add other providers here if needed
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,

@@ -1,128 +1,25 @@
 // screens/cart.dart
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' hide Consumer;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kofyimages/constants/cart_notifier.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/frame_models.dart';
-import 'package:kofyimages/services/payment_service.dart';
 import 'package:kofyimages/services/stripe_service.dart';
 import 'package:kofyimages/widgets/cart_widgets/empty_cart_widget.dart';
 import 'package:provider/provider.dart';
-// Import your CartNotifier and models
 
-class CartPage extends StatefulWidget {
+class CartPage extends ConsumerWidget {
   const CartPage({super.key});
-
   @override
-  State<CartPage> createState() => _CartPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stripeService = ref.read(stripePaymentProvider);
 
-class _CartPageState extends State<CartPage> {
-  bool isProcessingPayment = false;
-
-  @override
-  void initState() {
-    super.initState();
-    StripeService.init();
-  }
-
-  Future<void> _handlePayment(BuildContext context, CartNotifier cart) async {
-    setState(() {
-      isProcessingPayment = true;
-    });
-
-    try {
-      bool paymentSuccess = await PaymentService.makePayment(
-        amount: cart.totalPrice.toString(),
-        currency: 'USD',
-        context: context,
-      );
-
-      if (paymentSuccess) {
-        // Payment successful - show success dialog and clear cart
-        _showPaymentSuccessDialog(context, cart);
-      }
-    } catch (e) {
-      // Error handling is done in PaymentService
-    } finally {
-      setState(() {
-        isProcessingPayment = false;
-      });
-    }
-  }
-
-  void _showPaymentSuccessDialog(BuildContext context, CartNotifier cart) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 24.sp),
-            SizedBox(width: 8.w),
-            Text(
-              'Payment Successful!',
-              style: GoogleFonts.montserrat(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.green[700],
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Thank you for your purchase!',
-              style: GoogleFonts.montserrat(fontSize: 16.sp),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Total Paid: \$${cart.totalPrice.toStringAsFixed(2)}',
-              style: GoogleFonts.montserrat(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'You will receive a confirmation email shortly.',
-              style: GoogleFonts.montserrat(
-                fontSize: 12.sp,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              cart.clearCart(); // Clear the cart
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Go back to previous screen
-            },
-            child: Text(
-              'Continue Shopping',
-              style: GoogleFonts.montserrat(
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: const CustomAppBar(),
@@ -273,9 +170,6 @@ class _CartPageState extends State<CartPage> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: isProcessingPayment
-                                  ? null
-                                  : () => _handlePayment(context, cart),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black,
                                 foregroundColor: Colors.white,
@@ -284,37 +178,32 @@ class _CartPageState extends State<CartPage> {
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
                               ),
-                              child: isProcessingPayment
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        SizedBox(
-                                          width: 20.w,
-                                          height: 20.h,
-                                          child:
-                                              const CircularProgressIndicator(
-                                                color: Colors.white,
-                                                strokeWidth: 2,
-                                              ),
-                                        ),
-                                        SizedBox(width: 12.w),
-                                        Text(
-                                          'Processing...',
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : Text(
-                                      'Pay Now - \$${cart.totalPrice.toStringAsFixed(2)}',
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                              onPressed: () async {
+                                try {
+                                  await stripeService.initPaymentSheet(
+                                    amount: '10',
+                                    currency: 'usd',
+                                    merchantName: 'KofyImages',
+                                  );
+                                  await stripeService.presentPaymentSheet();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Payment Succesful "),
                                     ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Error: $e")),
+                                  );
+                                }
+                              },
+                              child: Text(
+                                'Pay Now - \$${cart.totalPrice.toStringAsFixed(2)}',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -334,6 +223,7 @@ class _CartPageState extends State<CartPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         title: Text(
           'Clear Cart',
           style: GoogleFonts.montserrat(
@@ -369,58 +259,6 @@ class _CartPageState extends State<CartPage> {
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showCheckoutDialog(BuildContext context, CartNotifier cart) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Checkout Summary',
-          style: GoogleFonts.montserrat(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Total Items: ${cart.totalItems}',
-              style: GoogleFonts.montserrat(fontSize: 14.sp),
-            ),
-            Text(
-              'Total Price: \$${cart.totalPrice.toStringAsFixed(2)}',
-              style: GoogleFonts.montserrat(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.green[700],
-              ),
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'Cart details have been printed to console.',
-              style: GoogleFonts.montserrat(
-                fontSize: 12.sp,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Close',
-              style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -543,18 +381,19 @@ class CartItemCard extends StatelessWidget {
                       color: Colors.grey[600],
                     ),
                   ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    '\$${cartItem.totalPrice.toStringAsFixed(2)}',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green[700],
+                    ),
+                  ),
                   SizedBox(height: 8.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '\$${cartItem.totalPrice.toStringAsFixed(2)}',
-                        style: GoogleFonts.montserrat(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green[700],
-                        ),
-                      ),
                       Row(
                         children: [
                           // Quantity Controls
