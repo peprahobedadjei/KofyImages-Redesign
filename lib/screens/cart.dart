@@ -9,12 +9,117 @@ import 'package:kofyimages/constants/cart_notifier.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/frame_models.dart';
+import 'package:kofyimages/services/payment_service.dart';
+import 'package:kofyimages/services/stripe_service.dart';
 import 'package:kofyimages/widgets/cart_widgets/empty_cart_widget.dart';
 import 'package:provider/provider.dart';
 // Import your CartNotifier and models
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  bool isProcessingPayment = false;
+
+  @override
+  void initState() {
+    super.initState();
+    StripeService.init();
+  }
+
+  Future<void> _handlePayment(BuildContext context, CartNotifier cart) async {
+    setState(() {
+      isProcessingPayment = true;
+    });
+
+    try {
+      bool paymentSuccess = await PaymentService.makePayment(
+        amount: cart.totalPrice.toString(),
+        currency: 'USD',
+        context: context,
+      );
+
+      if (paymentSuccess) {
+        // Payment successful - show success dialog and clear cart
+        _showPaymentSuccessDialog(context, cart);
+      }
+    } catch (e) {
+      // Error handling is done in PaymentService
+    } finally {
+      setState(() {
+        isProcessingPayment = false;
+      });
+    }
+  }
+
+  void _showPaymentSuccessDialog(BuildContext context, CartNotifier cart) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 24.sp),
+            SizedBox(width: 8.w),
+            Text(
+              'Payment Successful!',
+              style: GoogleFonts.montserrat(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.green[700],
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Thank you for your purchase!',
+              style: GoogleFonts.montserrat(fontSize: 16.sp),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Total Paid: \$${cart.totalPrice.toStringAsFixed(2)}',
+              style: GoogleFonts.montserrat(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'You will receive a confirmation email shortly.',
+              style: GoogleFonts.montserrat(
+                fontSize: 12.sp,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              cart.clearCart(); // Clear the cart
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Go back to previous screen
+            },
+            child: Text(
+              'Continue Shopping',
+              style: GoogleFonts.montserrat(
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +150,7 @@ class CartPage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 8.w),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 12.sp,
-                ),
+                Icon(Icons.arrow_forward_ios, color: Colors.white, size: 12.sp),
                 SizedBox(width: 8.w),
                 Text(
                   'Cart Page',
@@ -62,7 +163,7 @@ class CartPage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Cart content
           Expanded(
             child: Consumer<CartNotifier>(
@@ -172,10 +273,9 @@ class CartPage extends StatelessWidget {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {
-                                cart.printCartItems();
-                                _showCheckoutDialog(context, cart);
-                              },
+                              onPressed: isProcessingPayment
+                                  ? null
+                                  : () => _handlePayment(context, cart),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black,
                                 foregroundColor: Colors.white,
@@ -184,13 +284,37 @@ class CartPage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
                               ),
-                              child: Text(
-                                'Proceed to Checkout',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              child: isProcessingPayment
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          width: 20.w,
+                                          height: 20.h,
+                                          child:
+                                              const CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2,
+                                              ),
+                                        ),
+                                        SizedBox(width: 12.w),
+                                        Text(
+                                          'Processing...',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Text(
+                                      'Pay Now - \$${cart.totalPrice.toStringAsFixed(2)}',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
@@ -296,9 +420,7 @@ class CartPage extends StatelessWidget {
             },
             child: Text(
               'Close',
-              style: GoogleFonts.montserrat(
-                fontWeight: FontWeight.w500,
-              ),
+              style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -348,15 +470,16 @@ class CartItemCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: CachedNetworkImage(
-  imageUrl: cartItem.imageUrl,
-  width: 80.w,
-  height: 80.h,
-  fit: BoxFit.contain,
-  memCacheWidth: 400,   
-  memCacheHeight: 400,
-  placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-  errorWidget: (_, __, ___) => const Icon(Icons.error),
-),
+                imageUrl: cartItem.imageUrl,
+                width: 80.w,
+                height: 80.h,
+                fit: BoxFit.contain,
+                memCacheWidth: 400,
+                memCacheHeight: 400,
+                placeholder: (_, __) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (_, __, ___) => const Icon(Icons.error),
+              ),
             ),
 
             SizedBox(width: 16.w),
@@ -445,7 +568,9 @@ class CartItemCard extends StatelessWidget {
                                 GestureDetector(
                                   onTap: () {
                                     if (cartItem.productQuantity > 1) {
-                                      onUpdateQuantity(cartItem.productQuantity - 1);
+                                      onUpdateQuantity(
+                                        cartItem.productQuantity - 1,
+                                      );
                                     }
                                   },
                                   child: Container(
@@ -453,14 +578,16 @@ class CartItemCard extends StatelessWidget {
                                     child: Icon(
                                       Icons.remove,
                                       size: 16.sp,
-                                      color: cartItem.productQuantity > 1 
-                                          ? Colors.black 
+                                      color: cartItem.productQuantity > 1
+                                          ? Colors.black
                                           : Colors.grey[400],
                                     ),
                                   ),
                                 ),
                                 Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                  ),
                                   child: Text(
                                     cartItem.productQuantity.toString(),
                                     style: GoogleFonts.montserrat(
@@ -471,7 +598,9 @@ class CartItemCard extends StatelessWidget {
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    onUpdateQuantity(cartItem.productQuantity + 1);
+                                    onUpdateQuantity(
+                                      cartItem.productQuantity + 1,
+                                    );
                                   },
                                   child: Container(
                                     padding: EdgeInsets.all(6.w),
