@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kofyimages/constants/connection_listener.dart';
+import 'package:kofyimages/screens/home.dart';
 
 class EmptyCartWidget extends StatelessWidget {
   const EmptyCartWidget({super.key});
@@ -26,9 +28,9 @@ class EmptyCartWidget extends StatelessWidget {
                 color: Colors.grey[400],
               ),
             ),
-            
+
             SizedBox(height: 40.h),
-            
+
             // Main message
             Text(
               'Your cart is empty',
@@ -39,9 +41,9 @@ class EmptyCartWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             SizedBox(height: 12.h),
-            
+
             // Subtitle
             Text(
               'Explore our cities and shop for different frames.',
@@ -52,9 +54,9 @@ class EmptyCartWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             SizedBox(height: 40.h),
-            
+
             // Shop now button
             ElevatedButton(
               onPressed: () {
@@ -72,17 +74,25 @@ class EmptyCartWidget extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.shopping_bag_outlined,
-                    size: 20.sp,
-                  ),
+                  Icon(Icons.shopping_bag_outlined, size: 20.sp),
                   SizedBox(width: 8.w),
-                  Text(
-                    'Explore Cities',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                  GestureDetector(
+                    child: Text(
+                      'Explore Cities',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const ConnectionListener(child: MyHomePage()),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

@@ -73,8 +73,26 @@ class CartItem {
       'productSize': productSize,
       'productQuantity': productQuantity,
       'productType': productType,
+      'imageUrl': imageUrl,
     };
+
+    
   }
+
+    factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      productId: json['productId'],
+      productName: json['productName'],
+      productFrameColor: json['productFrameColor'],
+      productPrice: json['productPrice'],
+      productSize: json['productSize'],
+      productQuantity: json['productQuantity'],
+      productType: json['productType'],
+      imageUrl: json['imageUrl'],
+    );
+  }
+
+  
 
   double get totalPrice => double.parse(productPrice) * productQuantity;
 }
