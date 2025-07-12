@@ -12,7 +12,6 @@ import 'package:kofyimages/models/frame_models.dart';
 import 'package:kofyimages/services/get_all_frames.dart';
 import 'package:provider/provider.dart';
 
-
 class FrameShopPage extends StatefulWidget {
   const FrameShopPage({super.key});
 
@@ -58,10 +57,10 @@ class _FrameShopPageState extends State<FrameShopPage> {
     }
   }
 
-  List<FrameItem> get currentFrames => 
+  List<FrameItem> get currentFrames =>
       isPictureFramesSelected ? pictureFrames : paintingFrames;
 
-  String get currentFrameType => 
+  String get currentFrameType =>
       isPictureFramesSelected ? 'Picture' : 'Painting';
 
   @override
@@ -93,11 +92,7 @@ class _FrameShopPageState extends State<FrameShopPage> {
                   ),
                 ),
                 SizedBox(width: 8.w),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 12.sp,
-                ),
+                Icon(Icons.arrow_forward_ios, color: Colors.white, size: 12.sp),
                 SizedBox(width: 8.w),
                 Text(
                   'Frame Shop',
@@ -138,8 +133,8 @@ class _FrameShopPageState extends State<FrameShopPage> {
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: 16.h),
                       decoration: BoxDecoration(
-                        color: isPictureFramesSelected 
-                            ? Colors.black 
+                        color: isPictureFramesSelected
+                            ? Colors.black
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(25.r),
                       ),
@@ -149,8 +144,8 @@ class _FrameShopPageState extends State<FrameShopPage> {
                           style: GoogleFonts.montserrat(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: isPictureFramesSelected 
-                                ? Colors.white 
+                            color: isPictureFramesSelected
+                                ? Colors.white
                                 : Colors.black,
                           ),
                         ),
@@ -168,8 +163,8 @@ class _FrameShopPageState extends State<FrameShopPage> {
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: 16.h),
                       decoration: BoxDecoration(
-                        color: !isPictureFramesSelected 
-                            ? Colors.black 
+                        color: !isPictureFramesSelected
+                            ? Colors.black
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(25.r),
                       ),
@@ -179,8 +174,8 @@ class _FrameShopPageState extends State<FrameShopPage> {
                           style: GoogleFonts.montserrat(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: !isPictureFramesSelected 
-                                ? Colors.white 
+                            color: !isPictureFramesSelected
+                                ? Colors.white
                                 : Colors.black,
                           ),
                         ),
@@ -197,60 +192,60 @@ class _FrameShopPageState extends State<FrameShopPage> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : errorMessage != null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 48.sp,
-                              color: Colors.red,
-                            ),
-                            SizedBox(height: 16.h),
-                            Text(
-                              'Error loading frames',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              errorMessage!,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 14.sp,
-                                color: Colors.grey[600],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 16.h),
-                            ElevatedButton(
-                              onPressed: _fetchData,
-                              child: const Text('Retry'),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48.sp,
+                          color: Colors.red,
                         ),
-                      )
-                    : currentFrames.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No ${currentFrameType.toLowerCase()} frames available',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16.sp,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: EdgeInsets.all(20.w),
-                            itemCount: currentFrames.length,
-                            itemBuilder: (context, index) {
-                              return FrameCard(
-                                frameItem: currentFrames[index],
-                                frameType: currentFrameType,
-                              );
-                            },
+                        SizedBox(height: 16.h),
+                        Text(
+                          'Error loading frames',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
                           ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          errorMessage!,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 14.sp,
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 16.h),
+                        ElevatedButton(
+                          onPressed: _fetchData,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : currentFrames.isEmpty
+                ? Center(
+                    child: Text(
+                      'No ${currentFrameType.toLowerCase()} frames available',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 16.sp,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.all(20.w),
+                    itemCount: currentFrames.length,
+                    itemBuilder: (context, index) {
+                      return FrameCard(
+                        frameItem: currentFrames[index],
+                        frameType: currentFrameType,
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -301,8 +296,8 @@ class _FrameCardState extends State<FrameCard> {
             child: CachedNetworkImage(
               imageUrl: widget.frameItem.getImageUrl(selectedColor),
               height: 260.h,
-                    memCacheWidth: 800, // Add this
-      memCacheHeight: 600, // Add this
+              memCacheWidth: 800, // Add this
+              memCacheHeight: 600, // Add this
               width: double.infinity,
               fit: BoxFit.contain,
               placeholder: (context, url) => Container(
@@ -368,9 +363,9 @@ class _FrameCardState extends State<FrameCard> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                
+
                 SizedBox(height: 8.h),
-                
+
                 Row(
                   children: [
                     _buildColorOption('neutral', Colors.grey[300]!),
@@ -414,10 +409,7 @@ class _FrameCardState extends State<FrameCard> {
                                 },
                                 child: Container(
                                   padding: EdgeInsets.all(8.w),
-                                  child: Icon(
-                                    Icons.remove,
-                                    size: 16.sp,
-                                  ),
+                                  child: Icon(Icons.remove, size: 16.sp),
                                 ),
                               ),
                               Container(
@@ -438,10 +430,7 @@ class _FrameCardState extends State<FrameCard> {
                                 },
                                 child: Container(
                                   padding: EdgeInsets.all(8.w),
-                                  child: Icon(
-                                    Icons.add,
-                                    size: 16.sp,
-                                  ),
+                                  child: Icon(Icons.add, size: 16.sp),
                                 ),
                               ),
                             ],
@@ -449,7 +438,7 @@ class _FrameCardState extends State<FrameCard> {
                         ),
                       ],
                     ),
-                    
+
                     // Add to Cart Button
                     ElevatedButton(
                       onPressed: () {
@@ -461,14 +450,20 @@ class _FrameCardState extends State<FrameCard> {
                           productSize: widget.frameItem.frameSize,
                           productType: widget.frameType,
                           productQuantity: quantity,
-                          imageUrl: widget.frameItem.getImageUrl(selectedColor)
+                          imageUrl: widget.frameItem.getImageUrl(selectedColor),
                         );
 
                         context.read<CartNotifier>().addItem(cartItem);
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Added to cart!'),
+                            content: Text(
+                              'Added to cart!',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             duration: const Duration(seconds: 2),
                             backgroundColor: Colors.green,
                           ),
