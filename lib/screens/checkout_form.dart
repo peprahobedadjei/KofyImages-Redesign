@@ -1,10 +1,10 @@
-// screens/checkout_form.dart
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:kofyimages/services/stripe_service.dart';
 import 'package:kofyimages/models/frame_models.dart';
 
@@ -36,7 +36,6 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
   final _billingCityController = TextEditingController();
   final _billingStateController = TextEditingController();
   final _billingPostalController = TextEditingController();
-  final _billingCountryController = TextEditingController(text: 'US');
 
   // Shipping Address Controllers
   final _shippingLine1Controller = TextEditingController();
@@ -44,10 +43,21 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
   final _shippingCityController = TextEditingController();
   final _shippingStateController = TextEditingController();
   final _shippingPostalController = TextEditingController();
-  final _shippingCountryController = TextEditingController(text: 'US');
+
+  // Country selections
+  Country? _selectedBillingCountry;
+  Country? _selectedShippingCountry;
 
   bool _sameAsShipping = true;
   bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Set default country to US
+    _selectedBillingCountry = Country.parse('US');
+    _selectedShippingCountry = Country.parse('US');
+  }
 
   @override
   void dispose() {
@@ -59,13 +69,11 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
     _billingCityController.dispose();
     _billingStateController.dispose();
     _billingPostalController.dispose();
-    _billingCountryController.dispose();
     _shippingLine1Controller.dispose();
     _shippingLine2Controller.dispose();
     _shippingCityController.dispose();
     _shippingStateController.dispose();
     _shippingPostalController.dispose();
-    _shippingCountryController.dispose();
     super.dispose();
   }
 
@@ -260,9 +268,6 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
     final postalController = isBilling
         ? _billingPostalController
         : _shippingPostalController;
-    final countryController = isBilling
-        ? _billingCountryController
-        : _shippingCountryController;
 
     return Column(
       children: [
@@ -328,20 +333,75 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
             ),
             SizedBox(width: 12.w),
             Expanded(
-              child: _buildTextField(
-                controller: countryController,
-                label: 'Country',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter country';
-                  }
-                  return null;
-                },
-              ),
+              child: _buildCountryPicker(isBilling: isBilling),
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCountryPicker({required bool isBilling}) {
+    final selectedCountry = isBilling ? _selectedBillingCountry : _selectedShippingCountry;
+    
+    return GestureDetector(
+      onTap: () {
+        showCountryPicker(
+          context: context,
+          showPhoneCode: false,
+          onSelect: (Country country) {
+            setState(() {
+              if (isBilling) {
+                _selectedBillingCountry = country;
+              } else {
+                _selectedShippingCountry = country;
+              }
+            });
+          },
+          countryListTheme: CountryListThemeData(
+            borderRadius: BorderRadius.circular(8.r),
+            inputDecoration: InputDecoration(
+              labelText: 'Search',
+              hintText: 'Start typing to search',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+          ),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[400]!),
+          borderRadius: BorderRadius.circular(8.r),
+          color: Colors.white,
+        ),
+        child: Row(
+          children: [
+            Text(
+              selectedCountry?.flagEmoji ?? '🇺🇸',
+              style: TextStyle(fontSize: 18.sp),
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                selectedCountry?.name ?? 'United States',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14.sp,
+                  color: Colors.black87,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(
+              Icons.arrow_drop_down,
+              color: Colors.grey[600],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -437,6 +497,21 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
       return;
     }
 
+    // Validate country selections
+    if (_selectedBillingCountry == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a billing country')),
+      );
+      return;
+    }
+
+    if (!_sameAsShipping && _selectedShippingCountry == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a shipping country')),
+      );
+      return;
+    }
+
     setState(() {
       _isProcessing = true;
     });
@@ -457,7 +532,7 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
           city: _billingCityController.text,
           state: _billingStateController.text,
           postalCode: _billingPostalController.text,
-          country: _billingCountryController.text,
+          country: _selectedBillingCountry!.countryCode, // This returns the 2-letter code
         ),
         shippingAddress: _sameAsShipping
             ? null
@@ -469,7 +544,7 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
                 city: _shippingCityController.text,
                 state: _shippingStateController.text,
                 postalCode: _shippingPostalController.text,
-                country: _shippingCountryController.text,
+                country: _selectedShippingCountry!.countryCode, // This returns the 2-letter code
               ),
       );
 
