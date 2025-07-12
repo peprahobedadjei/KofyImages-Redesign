@@ -325,7 +325,9 @@ class CartItemCard extends StatelessWidget {
                 memCacheWidth: 400,
                 memCacheHeight: 400,
                 placeholder: (_, __) =>
-                    const Center(child: CircularProgressIndicator()),
+                    const Center(child: CircularProgressIndicator(                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.black,
+                            ))),
                 errorWidget: (_, __, ___) => const Icon(Icons.error),
               ),
             ),

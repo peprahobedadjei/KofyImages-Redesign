@@ -89,23 +89,6 @@ class SideDrawer extends StatelessWidget {
                             },
                           ),
                           _buildMenuItem(
-                            icon: Icons.person_outline,
-                            title: 'Profile',
-                            onTap: () {
-                              // Replace with actual profile screen
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Profile page coming soon!',
-                                    style: GoogleFonts.montserrat(),
-                                  ),
-                                  backgroundColor: Colors.black,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            },
-                          ),
-                          _buildMenuItem(
                             icon: Icons.event_outlined,
                             title: 'Events',
                             onTap: () {

@@ -99,6 +99,7 @@ flutter:
     - assets/icon_background.png
     - assets/icon_monochrome.png
     - assets/frame.jpeg
+    - assets/events.jpeg
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

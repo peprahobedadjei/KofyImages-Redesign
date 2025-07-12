@@ -11,7 +11,7 @@ import 'package:kofyimages/constants/connection_listener.dart';
 import 'package:kofyimages/widgets/home_widgets/photos_of_week_widget.dart';
 import 'package:kofyimages/models/city_model.dart';
 import 'package:kofyimages/services/get_all_cities.dart';
-
+import 'package:kofyimages/widgets/home_widgets/popular_cities_widget.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     final trimmedQuery = query.trim();
-    
+
     // Check if cities are loaded
     if (!_citiesLoaded) {
       // If cities aren't loaded yet, just filter and scroll
@@ -71,10 +71,10 @@ class _MyHomePageState extends State<MyHomePage> {
     City? exactMatch;
     try {
       exactMatch = _allCities.firstWhere(
-        (city) => 
-          city.formattedName.toLowerCase() == trimmedQuery.toLowerCase() ||
-          city.cityPart.toLowerCase() == trimmedQuery.toLowerCase() ||
-          city.name.toLowerCase() == trimmedQuery.toLowerCase(),
+        (city) =>
+            city.formattedName.toLowerCase() == trimmedQuery.toLowerCase() ||
+            city.cityPart.toLowerCase() == trimmedQuery.toLowerCase() ||
+            city.name.toLowerCase() == trimmedQuery.toLowerCase(),
       );
     } catch (e) {
       exactMatch = null;
@@ -96,12 +96,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // Show a brief loading/navigation feedback
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Opening ${city.formattedName.isNotEmpty ? city.formattedName : city.name}...'),
+        content: Text(
+          'Opening ${city.formattedName.isNotEmpty ? city.formattedName : city.name}...',
+        ),
         duration: const Duration(milliseconds: 1500),
         backgroundColor: Colors.black87,
       ),
     );
-    
+
     // Add a small delay for better UX
     Future.delayed(const Duration(milliseconds: 500), () {
       _navigateToCityDetails(city);
@@ -154,9 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 SliverToBoxAdapter(
                   child: HeroSection(onSearchSubmitted: _onSearchSubmitted),
                 ),
-                                const SliverToBoxAdapter(
-                  child: BuyaFrameCard(),
-                ),
+                const SliverToBoxAdapter(child: BuyaFrameCard()),
+                const SliverToBoxAdapter(child: PopularCitiesWidget()),
                 const SliverToBoxAdapter(child: PhotosOfWeekWidget()),
                 SliverToBoxAdapter(
                   child: CitiesWidget(
@@ -165,9 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     parentScrollController: _scrollController,
                   ),
                 ),
-                const SliverToBoxAdapter(
-                  child: FooterWidget(),
-                ),
+                const SliverToBoxAdapter(child: FooterWidget()),
               ],
             ),
           ],

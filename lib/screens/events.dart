@@ -7,7 +7,9 @@ import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/event_model.dart';
 import 'package:kofyimages/services/get_events.dart';
+import 'package:kofyimages/services/get_all_hero_images.dart';
 import 'package:kofyimages/widgets/footer/footer_widget.dart';
+import 'dart:async';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -18,17 +20,26 @@ class EventsPage extends StatefulWidget {
 
 class _EventsPageState extends State<EventsPage> {
   final TextEditingController _searchController = TextEditingController();
+  final PageController _pageController = PageController();
+  
   List<EventModel> events = [];
   List<EventModel> filteredEvents = [];
+  List<String> _heroImages = [];
+  
   bool isLoading = true;
   bool hasError = false;
   bool isSearching = false;
+  bool _isLoadingHeroImages = true;
+  
   String searchQuery = '';
+  int _currentIndex = 0;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _loadEvents();
+    _loadHeroImages();
   }
 
   Future<void> _loadEvents() async {
@@ -51,6 +62,46 @@ class _EventsPageState extends State<EventsPage> {
         hasError = true;
       });
     }
+  }
+
+  Future<void> _loadHeroImages() async {
+    try {
+      final images = await HeroImagesService.getAllPhotosUrls();
+      if (mounted) {
+        setState(() {
+          _heroImages = images;
+          _isLoadingHeroImages = false;
+        });
+        
+        // Start auto-scroll if images are loaded
+        if (_heroImages.isNotEmpty) {
+          _startAutoScroll();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingHeroImages = false;
+          // Fallback to default image if API fails
+          _heroImages = ['assets/events.jpeg'];
+        });
+      }
+    }
+  }
+
+  void _startAutoScroll() {
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (_heroImages.isNotEmpty) {
+        _currentIndex = (_currentIndex + 1) % _heroImages.length;
+        if (_pageController.hasClients) {
+          _pageController.animateToPage(
+            _currentIndex,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
   }
 
   void _handleSearch() {
@@ -81,9 +132,87 @@ class _EventsPageState extends State<EventsPage> {
     });
   }
 
+  Widget _buildImageCarousel() {
+    if (_isLoadingHeroImages) {
+      return Container(
+        color: Colors.grey[300],
+        child: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+      );
+    }
+
+    if (_heroImages.isEmpty) {
+      return Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/events.jpeg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          itemCount: _heroImages.length,
+          itemBuilder: (context, index) {
+            final imageUrl = _heroImages[index];
+            
+            // Use CachedNetworkImage for network URLs, AssetImage for local assets
+            if (imageUrl.startsWith('http')) {
+              return CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                memCacheWidth: 800,
+                memCacheHeight: 600,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[300],
+                  child: Icon(
+                    Icons.error,
+                    color: Colors.grey[600],
+                    size: 32.sp,
+                  ),
+                ),
+              );
+            } else {
+              return Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
+    _pageController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -100,7 +229,7 @@ class _EventsPageState extends State<EventsPage> {
   Widget _buildEventContent() {
     return CustomScrollView(
       slivers: [
-        // Hero Section with Search
+        // Hero Section with Search and Carousel
         SliverAppBar(
           expandedHeight: 400.h, // Increased height to accommodate search
           floating: false,
@@ -114,15 +243,11 @@ class _EventsPageState extends State<EventsPage> {
             background: Stack(
               fit: StackFit.expand,
               children: [
+                // Background carousel
                 Container(
                   height: 520.h,
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/landing.jpg'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                  child: _buildImageCarousel(),
                 ),
                 // Gradient overlay
                 Container(
@@ -463,15 +588,8 @@ class _EventsPageState extends State<EventsPage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15.r),
+        border: Border.all(color: const Color.fromARGB(255, 194, 194, 194)),
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(255, 158, 158, 158),
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,6 +603,8 @@ class _EventsPageState extends State<EventsPage> {
             child: CachedNetworkImage(
               imageUrl: event.thumbnailUrl,
               height: 200.h,
+              memCacheWidth: 400,
+              memCacheHeight: 300,
               width: double.infinity,
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
@@ -631,7 +751,7 @@ class _EventsPageState extends State<EventsPage> {
                         color: Colors.grey[200],
                         child: Center(
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                           ),
                         ),
                       ),
