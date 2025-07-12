@@ -83,15 +83,6 @@ class CartNotifier extends ChangeNotifier {
     _saveCart();
   }
 
-  void printCartItems() {
-    print('=== CART ITEMS ===');
-    for (var item in _items) {
-      print(item.toJson());
-    }
-    print('Total Items: $totalItems');
-    print('Total Price: \$${totalPrice.toStringAsFixed(2)}');
-  }
-
   // ========== Persistence Logic ==========
   Future<void> _saveCart() async {
     final prefs = await SharedPreferences.getInstance();

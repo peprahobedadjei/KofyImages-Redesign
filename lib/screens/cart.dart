@@ -10,15 +10,41 @@ import 'package:kofyimages/constants/cart_notifier.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/frame_models.dart';
-import 'package:kofyimages/services/stripe_service.dart';
+import 'package:kofyimages/screens/checkout_form.dart';
 import 'package:kofyimages/widgets/cart_widgets/empty_cart_widget.dart';
 import 'package:provider/provider.dart';
 
 class CartPage extends ConsumerWidget {
   const CartPage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stripeService = ref.read(stripePaymentProvider);
+// Updated cart.dart - processPayment function
+Future<void> processPayment(BuildContext context, CartNotifier cart) async {
+  // Navigate to checkout form with cart items
+  final result = await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => CheckoutFormScreen(
+        totalAmount: cart.totalPrice,
+        totalItems: cart.totalItems,
+        cartItems: cart.items, // Pass the cart items
+      ),
+    ),
+  );
+
+  // If payment was successful, clear the cart
+  if (result == true) {
+    cart.clearCart();
+    // Optionally show a success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Order placed successfully!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+}
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -179,23 +205,7 @@ class CartPage extends ConsumerWidget {
                                 ),
                               ),
                               onPressed: () async {
-                                try {
-                                  await stripeService.initPaymentSheet(
-                                    amount: '10',
-                                    currency: 'usd',
-                                    merchantName: 'KofyImages',
-                                  );
-                                  await stripeService.presentPaymentSheet();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Payment Succesful "),
-                                    ),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text("Error: $e")),
-                                  );
-                                }
+                               await processPayment(context, cart);
                               },
                               child: Text(
                                 'Pay Now - \$${cart.totalPrice.toStringAsFixed(2)}',

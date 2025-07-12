@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     hide ChangeNotifierProvider;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,16 +7,14 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kofyimages/constants/cart_notifier.dart';
 import 'package:kofyimages/constants/network_monitor.dart';
-import 'package:kofyimages/constants/stripe_key.dart';
 import 'package:kofyimages/screens/splash_screen.dart';
 import 'package:kofyimages/constants/connection_listener.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  Stripe.publishableKey = publishableKey;
-
+  await dotenv.load();
+   Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY']!;
   await NetworkMonitor.initialize();
 
   runApp(const ProviderScope(child: MyApp()));
