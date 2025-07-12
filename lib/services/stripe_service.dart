@@ -108,7 +108,7 @@ class StripePaymentService {
   final Dio _dio = Dio();
 
   // Your backend API base URL
-  static const String _baseUrl = 'http://10.0.2.2:8000';
+  static const String _baseUrl = 'https://kofyimages-9dae18892c9f.herokuapp.com';
   static final String _apiKey = dotenv.env['API_KEY']!;
 
   // Store the order data from create-payment-intent response
@@ -143,6 +143,7 @@ class StripePaymentService {
     } catch (e) {
       // Handle different types of errors
       if (e is StripeException) {
+        print(e.toString());
         return _handleStripeError(e);
       } else {
         return PaymentResult(
