@@ -118,29 +118,6 @@ class _BuyaFrameCardState extends State<BuyaFrameCard> {
                           ),
                         ),
                       ),
-                      // Decorative corner accent
-                      Positioned(
-                        top: 16.h,
-                        right: 16.w,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 6.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20.r),
-                          ),
-                          child: Text(
-                            '✨ Premium',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
