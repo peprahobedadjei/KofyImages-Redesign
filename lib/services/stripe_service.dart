@@ -108,7 +108,8 @@ class StripePaymentService {
   final Dio _dio = Dio();
 
   // Your backend API base URL
-  static const String _baseUrl = 'https://kofyimages-9dae18892c9f.herokuapp.com';
+  static const String _baseUrl =
+      'https://kofyimages-9dae18892c9f.herokuapp.com/api';
   static final String _apiKey = dotenv.env['API_KEY']!;
 
   // Store the order data from create-payment-intent response
@@ -165,6 +166,7 @@ class StripePaymentService {
         );
       case FailureCode.Failed:
         return PaymentResult(
+         
           success: false,
           message: 'Payment failed: ${e.error.message}',
           errorCode: 'payment_failed',
@@ -285,7 +287,7 @@ class StripePaymentService {
       };
 
       final response = await _dio.post(
-        '$_baseUrl/create-payment-intent',
+        '$_baseUrl/create-payment-intent/',
         data: requestBody,
         options: Options(
           headers: {
