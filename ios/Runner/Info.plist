@@ -30,11 +30,14 @@
     <true/>
 
     <key>NSCameraUsageDescription</key>
-    <string>We need access to the camera to take photos.</string>
+    <string>KofyImages needs access to your camera to take photos, scan cards, and capture content directly within the app.</string>
+
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>We need access to your photo library to pick images.</string>
+    <string>KofyImages needs access to your photo library so you can choose and edit your existing images.</string>
+
     <key>NSMicrophoneUsageDescription</key>
-    <string>We need access to the microphone to record videos.</string>
+    <string>KofyImages needs access to your microphone to capture audio when recording videos.</string>
+
     
     <!-- Add network security configuration -->
     <key>NSAppTransportSecurity</key>
