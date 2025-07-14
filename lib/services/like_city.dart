@@ -29,7 +29,6 @@ static Future<LikeResponse> likeCity(String cityName) async {
     rethrow;
 } catch (e) {
   // Log or rethrow the original error to debug better
-  print('Unexpected error: $e');
   throw Exception('An unexpected error occurred');
 }
 }

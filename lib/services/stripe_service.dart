@@ -144,7 +144,6 @@ class StripePaymentService {
     } catch (e) {
       // Handle different types of errors
       if (e is StripeException) {
-        print(e.toString());
         return _handleStripeError(e);
       } else {
         return PaymentResult(
