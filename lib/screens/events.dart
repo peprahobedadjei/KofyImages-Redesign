@@ -244,7 +244,7 @@ class _EventsPageState extends State<EventsPage> {
               fit: StackFit.expand,
               children: [
                 // Background carousel
-                Container(
+                SizedBox(
                   height: 520.h,
                   width: double.infinity,
                   child: _buildImageCarousel(),

@@ -361,7 +361,7 @@ class _CityDetailPageState extends State<CityDetailPage>
             children: [
               // FrameShop image from assets
               Image.asset(
-                'assets/frame.jpeg', // Adjust path as needed
+                'assets/frame_card.jpeg', 
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: Colors.grey[300],

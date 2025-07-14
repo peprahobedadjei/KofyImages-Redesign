@@ -125,10 +125,30 @@ class ArticleWidget extends StatelessWidget {
                       ),
                     )
                   else
-                    Text(
-                      'No content available.',
-                      style: GoogleFonts.montserrat(fontSize: 14.sp, color: Colors.grey[600]),
-                    ),
+          Center(
+      child: Column(
+        children: [
+          Icon(Icons.category_outlined, size: 64.sp, color: Colors.grey[400]),
+          SizedBox(height: 16.h),
+          Text(
+            'No articles available',
+            style: GoogleFonts.montserrat(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'Articles for this city is coming soon',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    )
                 ],
               ),
             ),

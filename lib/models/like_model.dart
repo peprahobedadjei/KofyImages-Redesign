@@ -1,26 +1,24 @@
-// models/like_model.dart
-
-/// Model for the like response when a user likes a city
+/// Model for the like/unlike response
 class LikeResponse {
   final String detail;
-  final LikeData data;
+  final LikeData? data;
 
   LikeResponse({
     required this.detail,
-    required this.data,
+    this.data,
   });
 
   factory LikeResponse.fromJson(Map<String, dynamic> json) {
     return LikeResponse(
       detail: json['detail'],
-      data: LikeData.fromJson(json['data']),
+      data: json['data'] != null ? LikeData.fromJson(json['data']) : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'detail': detail,
-      'data': data.toJson(),
+      if (data != null) 'data': data!.toJson(),
     };
   }
 }
@@ -128,25 +126,6 @@ class LikeCity {
       'id': id,
       'name': name,
       'isReviewed': isReviewed,
-    };
-  }
-}
-
-/// Model for unlike response (usually just a success message)
-class UnlikeResponse {
-  final String detail;
-
-  UnlikeResponse({required this.detail});
-
-  factory UnlikeResponse.fromJson(Map<String, dynamic> json) {
-    return UnlikeResponse(
-      detail: json['detail'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'detail': detail,
     };
   }
 }

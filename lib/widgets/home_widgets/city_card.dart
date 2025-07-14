@@ -25,7 +25,7 @@ class VerticalCityCard extends StatefulWidget {
 
 class _VerticalCityCardState extends State<VerticalCityCard> {
   late City _city;
-  bool _isLiking = false; // Loading state for like operation
+  bool _isLiking = false;
 
   @override
   void initState() {
@@ -101,27 +101,8 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
 
   /// Handle like button tap - only supports liking (no unliking)
   void _handleLikeTap() async {
-    // If city is already liked, show message and return
-    if (_city.isLiked) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'You have already liked this city!',
-            style: GoogleFonts.montserrat(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     // Check if user is logged in
     final isLoggedIn = await AuthLoginService.isLoggedIn();
-    
     if (!isLoggedIn) {
       // Show login modal if user is not logged in
       showLoginModal(
@@ -131,8 +112,7 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) =>
-                  const ConnectionListener(child: LoginPage()),
+              builder: (_) => const ConnectionListener(child: LoginPage()),
             ),
           );
         },
@@ -149,18 +129,20 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
       return;
     }
 
-    // If user is logged in and city is not liked, proceed with like
     if (_isLiking) return; // Prevent multiple requests
 
     setState(() {
       _isLiking = true;
     });
 
+    // Capture the original state before toggling
+    final bool wasLiked = _city.isLiked;
+
     try {
-      // Like the city
+      // Like/Unlike the city
       final likeResponse = await LikeCityService.likeCity(_city.cityPart);
 
-      // Update UI with successful like
+      // Update UI with successful toggle
       setState(() {
         _city = City(
           id: _city.id,
@@ -171,78 +153,40 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
           cityPart: _city.cityPart,
           countryPart: _city.countryPart,
           reviewsCount: _city.reviewsCount,
-          likesCount: _city.likesCount + 1,
-          isLiked: true,
+          likesCount: wasLiked ? _city.likesCount - 1 : _city.likesCount + 1,
+          isLiked: !wasLiked,
           isReviewed: _city.isReviewed,
           createdAt: _city.createdAt,
         );
       });
 
-      // Show success feedback
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'City liked!',
+            wasLiked ? 'City unliked!' : 'City liked!',
             style: GoogleFonts.montserrat(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
-          duration: Duration(seconds: 1),
+          backgroundColor: wasLiked ? Colors.red : Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Show generic error message for other errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to update city. Please try again.',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          duration: Duration(seconds: 2),
           backgroundColor: Colors.red,
         ),
       );
-
-    } catch (e) {
-      // Handle "already liked" error specifically
-      if (e.toString().contains('already liked')) {
-        // Update local state to reflect that the city is already liked
-        setState(() {
-          _city = City(
-            id: _city.id,
-            name: _city.name,
-            country: _city.country,
-            formattedName: _city.formattedName,
-            thumbnailUrl: _city.thumbnailUrl,
-            cityPart: _city.cityPart,
-            countryPart: _city.countryPart,
-            reviewsCount: _city.reviewsCount,
-            likesCount: _city.likesCount,
-            isLiked: true,
-            isReviewed: _city.isReviewed,
-            createdAt: _city.createdAt,
-          );
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'You have already liked this city!',
-              style: GoogleFonts.montserrat(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      } else {
-        // Show generic error message for other errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to like city. Please try again.',
-              style: GoogleFonts.montserrat(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     } finally {
       setState(() {
         _isLiking = false;
@@ -319,9 +263,7 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
                         ),
                       ),
                     ),
-                    Container(
-                      color: Colors.black.withAlpha(30),
-                    ),
+                    Container(color: Colors.black.withAlpha(30)),
                     Positioned(
                       bottom: 100.h,
                       left: 35.w,
@@ -379,30 +321,35 @@ class _VerticalCityCardState extends State<VerticalCityCard> {
                           children: [
                             AnimatedSwitcher(
                               duration: Duration(milliseconds: 200),
-                              transitionBuilder: (Widget child, Animation<double> animation) {
-                                return ScaleTransition(scale: animation, child: child);
-                              },
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                    return ScaleTransition(
+                                      scale: animation,
+                                      child: child,
+                                    );
+                                  },
                               child: _isLiking
-                                ? SizedBox(
-                                    width: 26.sp,
-                                    height: 26.sp,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.0,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.red,
+                                  ? SizedBox(
+                                      width: 26.sp,
+                                      height: 26.sp,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.0,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.red,
+                                            ),
                                       ),
+                                    )
+                                  : Icon(
+                                      key: ValueKey(_city.isLiked),
+                                      _city.isLiked
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: _city.isLiked
+                                          ? Colors.red
+                                          : Colors.black87,
+                                      size: 26.sp,
                                     ),
-                                  )
-                                : Icon(
-                                    key: ValueKey(_city.isLiked),
-                                    _city.isLiked
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: _city.isLiked
-                                        ? Colors.red
-                                        : Colors.black87,
-                                    size: 26.sp,
-                                  ),
                             ),
                             if (_city.likesCount > 0) ...[
                               SizedBox(width: 6.w),
