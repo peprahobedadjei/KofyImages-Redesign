@@ -5,10 +5,9 @@ import 'package:kofyimages/services/auth_login.dart';
 import 'package:kofyimages/services/endpoints.dart';
 
 class LikeLifestyleImageService {
-
-  
-  /// Like a lifestyle image
-  static Future<Map<String, dynamic>> likeLifestyleImage(String imageId) async {
+  /// Toggle like/unlike for a lifestyle image
+  /// Returns a Map with 'action' key indicating 'liked' or 'unliked'
+  static Future<Map<String, dynamic>> toggleLikeLifestyleImage(String imageId) async {
     try {
       // Get the auth token
       final token = await AuthLoginService.getAccessToken();
@@ -27,17 +26,25 @@ class LikeLifestyleImageService {
         },
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return json.decode(response.body);
-      } else if (response.statusCode == 400) {
-        final errorData = json.decode(response.body);
-        throw Exception(errorData['message'] ?? 'Already liked this image');
+      if (response.statusCode == 201) {
+        // Photo liked
+        final responseData = json.decode(response.body);
+        return {
+          'action': 'liked',
+          'detail': responseData['detail'] ?? 'Photo liked'
+        };
+      } else if (response.statusCode == 200) {
+        // Photo unliked
+        final responseData = json.decode(response.body);
+        return {
+          'action': 'unliked',
+          'detail': responseData['detail'] ?? 'Photo unliked'
+        };
       } else {
-        throw Exception('Failed to like image: ${response.statusCode}');
+        throw Exception('Failed to toggle like: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error: $e');
     }
   }
-
 }

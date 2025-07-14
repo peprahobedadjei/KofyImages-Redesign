@@ -296,8 +296,6 @@ class _FrameCardState extends State<FrameCard> {
             child: CachedNetworkImage(
               imageUrl: widget.frameItem.getImageUrl(selectedColor),
               height: 260.h,
-              memCacheWidth: 800, // Add this
-              memCacheHeight: 600, // Add this
               width: double.infinity,
               fit: BoxFit.contain,
               placeholder: (context, url) => Container(
@@ -368,8 +366,6 @@ class _FrameCardState extends State<FrameCard> {
 
                 Row(
                   children: [
-                    _buildColorOption('neutral', Colors.grey[300]!),
-                    SizedBox(width: 12.w),
                     _buildColorOption('black', Colors.black),
                     SizedBox(width: 12.w),
                     _buildColorOption('brown', Colors.brown),
@@ -442,6 +438,24 @@ class _FrameCardState extends State<FrameCard> {
                     // Add to Cart Button
                     ElevatedButton(
                       onPressed: () {
+                        // Check if neutral color is selected
+                        if (selectedColor == 'neutral') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Please select a black or brown frame colour.',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              duration: const Duration(seconds: 3),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return; // Exit without adding to cart
+                        }
+
                         final cartItem = CartItem(
                           productId: widget.frameItem.id,
                           productName: widget.frameItem.name,

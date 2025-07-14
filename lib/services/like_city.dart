@@ -8,28 +8,30 @@ import 'package:kofyimages/services/endpoints.dart';
 class LikeCityService {
   
   /// Like a city
-  static Future<LikeResponse> likeCity(String cityName) async {
-    try {
-      // Make authenticated request to like the city
-      final response = await AuthLoginService.makeAuthenticatedRequest(
-        url: ApiEndpoints.postCityLike(cityName),
-        method: 'POST',
-      );
-
-      if (response.statusCode == 201) {
-        final responseData = jsonDecode(response.body);
-        return LikeResponse.fromJson(responseData);
-      } else {
-        // Handle error response
-        final errorData = jsonDecode(response.body);
-        throw Exception(errorData['detail'] ?? 'Failed to like city');
-      }
-    } catch (e) {
-      if (e is Exception) {
-        rethrow;
-      }
-      throw Exception('Network error: Please check your internet connection');
+static Future<LikeResponse> likeCity(String cityName) async {
+  try {
+    final response = await AuthLoginService.makeAuthenticatedRequest(
+      url: ApiEndpoints.postCityLike(cityName),
+      method: 'POST',
+    );
+    
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      return LikeResponse.fromJson(responseData);
+    } else {
+      final errorData = jsonDecode(response.body);
+      throw Exception(errorData['detail'] ?? 'Failed to update city');
     }
-  }
+  } on FormatException {
+    throw Exception('Invalid response format');
+  } on Exception {
+    // Re-throw API exceptions as-is
+    rethrow;
+} catch (e) {
+  // Log or rethrow the original error to debug better
+  print('Unexpected error: $e');
+  throw Exception('An unexpected error occurred');
+}
+}
 
 }

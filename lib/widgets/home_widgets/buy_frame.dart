@@ -84,8 +84,8 @@ class _BuyaFrameCardState extends State<BuyaFrameCard> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withOpacity(0.6),
-                              Colors.black.withOpacity(0.6),
+                              Colors.black.withOpacity(0.4),
+                              Colors.black.withOpacity(0.4),
                             ],
                           ),
                         ),

@@ -301,7 +301,7 @@ borderRadius: BorderRadius.only(
                     Icon(Icons.check_circle, color: Colors.green, size: 20.sp),
                     SizedBox(width: 8.w),
                     Text(
-                      'You have already reviewed this city',
+                      'Thank you for reviewing this city.',
                       style: GoogleFonts.montserrat(
                         fontSize: 14.sp,
                         color: Colors.green[700],

@@ -99,6 +99,7 @@ flutter:
     - assets/icon_background.png
     - assets/icon_monochrome.png
     - assets/frame.jpeg
+    - assets/frame_card.jpeg
     - assets/events.jpeg
     - .env
 

@@ -43,48 +43,29 @@ class _VideoImageWidgetState extends State<VideoImageWidget> {
     }
   }
 
-String _formatCount(int? count) {
-  if (count == null || count == 0) {
-    return ''; // Show nothing if count is null or 0
-  } else if (count >= 1000000) {
-    return '${(count / 1000000).toStringAsFixed(1)}M';
-  } else if (count >= 1000) {
-    return '${(count / 1000).toStringAsFixed(1)}K';
-  } else {
-    return count.toString();
+  String _formatCount(int? count) {
+    if (count == null || count == 0) {
+      return ''; // Show nothing if count is null or 0
+    } else if (count >= 1000000) {
+      return '${(count / 1000000).toStringAsFixed(1)}M';
+    } else if (count >= 1000) {
+      return '${(count / 1000).toStringAsFixed(1)}K';
+    } else {
+      return count.toString();
+    }
   }
-}
 
-
-  /// Handle like button tap for lifestyle images
+  /// Handle like/unlike button tap for lifestyle images
   Future<void> _handleLikeTap(int index) async {
     final item = _contentItems[index];
-    
+
     // Only allow liking for lifestyle images (not videos)
     final isVideo = item.youtubeUrl != null && item.youtubeUrl!.isNotEmpty;
     if (isVideo) return;
 
-    // If image is already liked, show message and return
-    if (item.likedByUser == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'You have already liked this image!',
-            style: GoogleFonts.montserrat(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     // Check if user is logged in
     final isLoggedIn = await AuthLoginService.isLoggedIn();
-    
+
     if (!isLoggedIn) {
       // Show login modal if user is not logged in
       showLoginModal(
@@ -102,13 +83,15 @@ String _formatCount(int? count) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const ConnectionListener(child: RegistrationPage()),
+              builder: (_) =>
+                  const ConnectionListener(child: RegistrationPage()),
             ),
           );
         },
       );
       return;
     }
+
     if (_likingItems.contains(index)) return; // Prevent multiple requests
 
     setState(() {
@@ -116,10 +99,14 @@ String _formatCount(int? count) {
     });
 
     try {
-      // Like the lifestyle image
-      final likeResponse = await LikeLifestyleImageService.likeLifestyleImage(
+      // Toggle like/unlike the lifestyle image
+      final response = await LikeLifestyleImageService.toggleLikeLifestyleImage(
         item.id.toString(),
       );
+
+      final action = response['action'];
+      final isLiked = action == 'liked';
+
       // Update the content item with new like status
       final updatedItem = ContentItem(
         id: item.id,
@@ -133,9 +120,11 @@ String _formatCount(int? count) {
         content: item.content,
         creatorName: item.creatorName,
         isPhotoOfWeek: item.isPhotoOfWeek,
-        likesCount: (item.likesCount ?? 0) + 1,
+        likesCount: isLiked
+            ? (item.likesCount ?? 0) + 1
+            : (item.likesCount ?? 1) - 1,
         commentsCount: item.commentsCount,
-        likedByUser: true,
+        likedByUser: isLiked,
       );
 
       setState(() {
@@ -146,71 +135,31 @@ String _formatCount(int? count) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Image liked!',
+            isLiked ? 'Image liked!' : 'Image unliked!',
             style: GoogleFonts.montserrat(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
           duration: Duration(seconds: 1),
-          backgroundColor: Colors.green,
+          backgroundColor: isLiked ? Colors.green : Colors.red,
         ),
       );
-
     } catch (e) {
-      // Handle "already liked" error specifically
-      if (e.toString().contains('already liked') || e.toString().contains('Already liked')) {
-        // Update local state to reflect that the image is already liked
-        final updatedItem = ContentItem(
-          id: item.id,
-          title: item.title,
-          youtubeUrl: item.youtubeUrl,
-          thumbnailUrl: item.thumbnailUrl,
-          imageUrl: item.imageUrl,
-          categoryName: item.categoryName,
-          cityName: item.cityName,
-          createdAt: item.createdAt,
-          content: item.content,
-          creatorName: item.creatorName,
-          isPhotoOfWeek: item.isPhotoOfWeek,
-          likesCount: item.likesCount,
-          commentsCount: item.commentsCount,
-          likedByUser: true,
-        );
-
-        setState(() {
-          _contentItems[index] = updatedItem;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'You have already liked this image!',
-              style: GoogleFonts.montserrat(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to update like status. Please try again.',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
             ),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.orange,
           ),
-        );
-      } else {
-        // Show generic error message for other errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to like image. Please try again.',
-              style: GoogleFonts.montserrat(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       setState(() {
         _likingItems.remove(index);
@@ -218,15 +167,51 @@ String _formatCount(int? count) {
     }
   }
 
+  /// Get list of image URLs and their corresponding indices (excluding videos)
+  List<Map<String, dynamic>> _getImageList() {
+    List<Map<String, dynamic>> imageList = [];
+    for (int i = 0; i < _contentItems.length; i++) {
+      final item = _contentItems[i];
+      final isVideo = item.youtubeUrl != null && item.youtubeUrl!.isNotEmpty;
+      if (!isVideo && item.imageUrl != null) {
+        imageList.add({
+          'imageUrl': item.imageUrl!,
+          'originalIndex': i,
+          'title': item.title,
+          'creatorName': item.creatorName,
+        });
+      }
+    }
+    return imageList;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_contentItems.isEmpty) {
-      return Center(
-        child: Text(
-          "No content available.",
-          style: GoogleFonts.montserrat(fontSize: 16.sp, color: Colors.grey),
-        ),
-      );
+    return Center(
+      child: Column(
+        children: [
+          Icon(Icons.category_outlined, size: 64.sp, color: Colors.grey[400]),
+          SizedBox(height: 16.h),
+          Text(
+            'No content available',
+            style: GoogleFonts.montserrat(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'Contents for this category is coming soon',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
     }
 
     return Column(
@@ -265,14 +250,25 @@ String _formatCount(int? count) {
                       );
                     }
                   } else if (item.imageUrl != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ConnectionListener(
-                          child: FullImagePage(imageUrl: item.imageUrl!),
-                        ),
-                      ),
+                    // Get the list of images and find the current image index
+                    final imageList = _getImageList();
+                    final currentImageIndex = imageList.indexWhere(
+                      (img) => img['originalIndex'] == index,
                     );
+                    
+                    if (currentImageIndex != -1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ConnectionListener(
+                            child: ImageGalleryPage(
+                              imageList: imageList,
+                              initialIndex: currentImageIndex,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                   }
                 },
                 child: Stack(
@@ -346,35 +342,47 @@ String _formatCount(int? count) {
                         children: [
                           // Like button - Enhanced for lifestyle images
                           GestureDetector(
-                            onTap: isLifestyleImage 
+                            onTap: isLifestyleImage
                                 ? () => _handleLikeTap(index)
                                 : null,
                             child: Row(
                               children: [
                                 AnimatedSwitcher(
                                   duration: Duration(milliseconds: 200),
-                                  transitionBuilder: (Widget child, Animation<double> animation) {
-                                    return ScaleTransition(scale: animation, child: child);
-                                  },
+                                  transitionBuilder:
+                                      (
+                                        Widget child,
+                                        Animation<double> animation,
+                                      ) {
+                                        return ScaleTransition(
+                                          scale: animation,
+                                          child: child,
+                                        );
+                                      },
                                   child: _likingItems.contains(index)
                                       ? SizedBox(
                                           width: 26.sp,
                                           height: 26.sp,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2.0,
-                                            valueColor: AlwaysStoppedAnimation<Color>(
-                                              Colors.red,
-                                            ),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.red,
+                                                ),
                                           ),
                                         )
                                       : Icon(
-                                          key: ValueKey('${item.id}_${item.likedByUser}'),
+                                          key: ValueKey(
+                                            '${item.id}_${item.likedByUser}',
+                                          ),
                                           item.likedByUser == true
                                               ? Icons.favorite
                                               : Icons.favorite_border,
                                           color: item.likedByUser == true
                                               ? Colors.red
-                                              : (isLifestyleImage ? Colors.black87 : Colors.grey),
+                                              : (isLifestyleImage
+                                                    ? Colors.black87
+                                                    : Colors.grey),
                                           size: 26.sp,
                                         ),
                                 ),
@@ -382,7 +390,9 @@ String _formatCount(int? count) {
                                 AnimatedSwitcher(
                                   duration: Duration(milliseconds: 300),
                                   child: Text(
-                                    key: ValueKey('${item.id}_${item.likesCount}'),
+                                    key: ValueKey(
+                                      '${item.id}_${item.likesCount}',
+                                    ),
                                     // Use actual likesCount from API, fallback to 0 if null
                                     _formatCount(item.likesCount),
                                     style: GoogleFonts.montserrat(
@@ -494,6 +504,218 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
   }
 }
 
+class ImageGalleryPage extends StatefulWidget {
+  final List<Map<String, dynamic>> imageList;
+  final int initialIndex;
+
+  const ImageGalleryPage({
+    super.key,
+    required this.imageList,
+    required this.initialIndex,
+  });
+
+  @override
+  State<ImageGalleryPage> createState() => _ImageGalleryPageState();
+}
+
+class _ImageGalleryPageState extends State<ImageGalleryPage> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _goToNextImage() {
+    if (_currentIndex < widget.imageList.length - 1) {
+      _pageController.nextPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _goToPreviousImage() {
+    if (_currentIndex > 0) {
+      _pageController.previousPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // PageView for images
+          PageView.builder(
+            controller: _pageController,
+            itemCount: widget.imageList.length,
+            onPageChanged: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            itemBuilder: (context, index) {
+              final imageData = widget.imageList[index];
+              return Center(
+                child: PhotoView(
+                  imageProvider: CachedNetworkImageProvider(
+                    imageData['imageUrl'],
+                  ),
+                  backgroundDecoration: const BoxDecoration(color: Colors.black),
+                  loadingBuilder: (context, event) => const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                  minScale: PhotoViewComputedScale.contained * 0.8,
+                  maxScale: PhotoViewComputedScale.covered * 2.0,
+                ),
+              );
+            },
+          ),
+
+          // Close button
+          Positioned(
+            top: 40.h,
+            left: 10.w,
+            child: IconButton(
+              icon: Icon(Icons.close, color: Colors.white, size: 30.sp),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+
+          // Image counter
+          Positioned(
+            top: 50.h,
+            right: 20.w,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                '${_currentIndex + 1} / ${widget.imageList.length}',
+                style: GoogleFonts.montserrat(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+
+          // Image title and creator (bottom overlay)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.8),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+              padding: EdgeInsets.all(20.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.imageList[_currentIndex]['title'],
+                    style: GoogleFonts.montserrat(
+                      color: Colors.white,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'By ${widget.imageList[_currentIndex]['creatorName'] ?? 'Unknown'}',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.white70,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Previous arrow
+          if (_currentIndex > 0)
+            Positioned(
+              left: 20.w,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: _goToPreviousImage,
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                      size: 24.sp,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Next arrow
+          if (_currentIndex < widget.imageList.length - 1)
+            Positioned(
+              right: 20.w,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: _goToNextImage,
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.white,
+                      size: 24.sp,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// Keep the original FullImagePage as backup (you can remove this if not needed)
 class FullImagePage extends StatelessWidget {
   final String imageUrl;
 

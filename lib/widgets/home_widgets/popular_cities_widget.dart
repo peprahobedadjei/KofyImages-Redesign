@@ -8,6 +8,7 @@ import 'package:kofyimages/services/popular_cities_service.dart';
 import 'package:kofyimages/screens/city_detail_page.dart';
 import 'package:kofyimages/screens/all_popular_cities_page.dart';
 import 'package:kofyimages/constants/connection_listener.dart';
+import 'dart:async';
 
 class PopularCitiesWidget extends StatefulWidget {
   const PopularCitiesWidget({super.key});
@@ -20,11 +21,81 @@ class _PopularCitiesWidgetState extends State<PopularCitiesWidget> {
   List<PopularCity> _popularCities = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  
+  // Auto-scroll variables
+  ScrollController _scrollController = ScrollController();
+  Timer? _autoScrollTimer;
+  bool _isUserScrolling = false;
+  bool _shouldAutoScroll = true;
 
   @override
   void initState() {
     super.initState();
     _loadPopularCities();
+    _setupAutoScroll();
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _setupAutoScroll() {
+    // Start auto-scroll after a delay
+    _autoScrollTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (!_isUserScrolling && 
+          _shouldAutoScroll && 
+          _scrollController.hasClients && 
+          _popularCities.isNotEmpty) {
+        _performAutoScroll();
+      }
+    });
+  }
+
+  void _performAutoScroll() {
+    if (!_scrollController.hasClients) return;
+
+    final maxScrollExtent = _scrollController.position.maxScrollExtent;
+    final currentScrollPosition = _scrollController.offset;
+    final cardWidth = 160.w + 16.w; // Card width + margin
+
+    // Calculate next scroll position
+    double nextScrollPosition = currentScrollPosition + cardWidth;
+
+    // If we've reached the end, scroll back to the beginning
+    if (nextScrollPosition >= maxScrollExtent) {
+      _scrollController.animateTo(
+        0,
+        duration: Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      _scrollController.animateTo(
+        nextScrollPosition,
+        duration: Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _handleUserScrollStart() {
+    _isUserScrolling = true;
+    _autoScrollTimer?.cancel();
+  }
+
+  void _handleUserScrollEnd() {
+    _isUserScrolling = false;
+    // Resume auto-scroll after user stops scrolling
+    _autoScrollTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (!_isUserScrolling && 
+          _shouldAutoScroll && 
+          _scrollController.hasClients && 
+          _popularCities.isNotEmpty) {
+        _performAutoScroll();
+      }
+    });
   }
 
   String formatLikes(int count) {
@@ -156,7 +227,7 @@ class _PopularCitiesWidgetState extends State<PopularCitiesWidget> {
   }
 
   Widget _buildLoadingState() {
-    return Container(
+    return SizedBox(
       height: 200.h,
       child: Center(
         child: CircularProgressIndicator(
@@ -218,7 +289,7 @@ class _PopularCitiesWidgetState extends State<PopularCitiesWidget> {
   }
 
   Widget _buildEmptyState() {
-    return Container(
+    return SizedBox(
       height: 200.h,
       child: Center(
         child: Column(
@@ -258,16 +329,27 @@ class _PopularCitiesWidgetState extends State<PopularCitiesWidget> {
 
     return Column(
       children: [
-        Container(
+        SizedBox(
           height: 200.h,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            itemCount: displayCities.length,
-            itemBuilder: (context, index) {
-              final city = displayCities[index];
-              return _buildCityCard(city, index);
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (notification is ScrollStartNotification) {
+                _handleUserScrollStart();
+              } else if (notification is ScrollEndNotification) {
+                _handleUserScrollEnd();
+              }
+              return false;
             },
+            child: ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              itemCount: displayCities.length,
+              itemBuilder: (context, index) {
+                final city = displayCities[index];
+                return _buildCityCard(city, index);
+              },
+            ),
           ),
         ),
 

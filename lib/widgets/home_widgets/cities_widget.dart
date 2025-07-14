@@ -93,7 +93,21 @@ class _CitiesWidgetState extends State<CitiesWidget> {
   void _scrollToCitiesSection() {
     if (widget.parentScrollController != null) {
       final targetPosition =
-          400.h + 220.h + 190.h; // Same position as in MyHomePage
+          400.h + 1400.h + 190.h; // Same position as in MyHomePage
+
+      widget.parentScrollController!.animateTo(
+        targetPosition,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+
+    void _scrollawayCitiesSection() {
+    if (widget.parentScrollController != null) {
+      final targetPosition =
+          400.h - 900.h - 190.h; // Same position as in MyHomePage
 
       widget.parentScrollController!.animateTo(
         targetPosition,
@@ -368,13 +382,30 @@ class _CitiesWidgetState extends State<CitiesWidget> {
                           ),
                           if (widget.searchQuery.isNotEmpty) ...[
                             SizedBox(height: 8.h),
-                            Text(
-                              'Search another city',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 14.sp,
-                                color: Colors.grey[500],
-                              ),
-                            ),
+ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(vertical: 16.h),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+          onPressed:() {
+            _scrollawayCitiesSection();
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(top: 0, bottom: 0, left: 8, right: 8),
+            child: Text(
+                    'Search for another city',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          ),
+        ),
+    
                           ],
                         ],
                       ),

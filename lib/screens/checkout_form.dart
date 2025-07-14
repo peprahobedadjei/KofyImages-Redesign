@@ -245,8 +245,14 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
         SizedBox(height: 16.h),
         _buildTextField(
           controller: _phoneController,
-          label: 'Phone Number (Optional)',
+          label: 'Phone Number',
           keyboardType: TextInputType.phone,
+                    validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your phone number';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -284,7 +290,13 @@ class _CheckoutFormScreenState extends ConsumerState<CheckoutFormScreen> {
         SizedBox(height: 16.h),
         _buildTextField(
           controller: line2Controller,
-          label: 'Apartment, suite, etc. (Optional)',
+          label: 'Apartment, suite, etc.',
+                    validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your Apartment, suite, etc number';
+            }
+            return null;
+          },
         ),
         SizedBox(height: 16.h),
         Row(
