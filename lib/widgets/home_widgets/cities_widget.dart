@@ -107,7 +107,7 @@ class _CitiesWidgetState extends State<CitiesWidget> {
     void _scrollawayCitiesSection() {
     if (widget.parentScrollController != null) {
       final targetPosition =
-          400.h - 900.h - 190.h; // Same position as in MyHomePage
+          400.h - 150.h - 190.h; // Same position as in MyHomePage
 
       widget.parentScrollController!.animateTo(
         targetPosition,
