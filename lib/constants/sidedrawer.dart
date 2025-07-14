@@ -7,6 +7,7 @@ import 'package:kofyimages/screens/events.dart';
 import 'package:kofyimages/screens/frameshop.dart';
 import 'package:kofyimages/screens/home.dart';
 import 'package:kofyimages/screens/login_page.dart';
+import 'package:kofyimages/screens/profile.dart';
 import 'package:kofyimages/screens/register.dart';
 import 'package:kofyimages/screens/upload_lifestyle_picture.dart';
 import 'package:kofyimages/services/auth_login.dart';
@@ -83,6 +84,21 @@ class SideDrawer extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (_) => const ConnectionListener(
                                     child: MyHomePage(),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                                                    _buildMenuItem(
+                            icon: Icons.person_4_outlined,
+                            title: 'User Profile',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ConnectionListener(
+                                    child: UserProfileScreen(),
                                   ),
                                 ),
                               );

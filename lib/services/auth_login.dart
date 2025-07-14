@@ -229,7 +229,7 @@ class AuthLoginService {
       case 'PUT':
         return await http.put(Uri.parse(url), headers: headers, body: body);
       case 'DELETE':
-        return await http.delete(Uri.parse(url), headers: headers);
+        return await http.delete(Uri.parse(url), headers: headers, body: body);
       default:
         throw Exception('Unsupported HTTP method: $method');
     }
