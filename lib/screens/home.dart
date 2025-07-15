@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kofyimages/screens/city_detail_page.dart';
@@ -86,7 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
       await Future.wait(refreshOperations);
     } catch (e) {
       // Handle error if needed
-      print('Error refreshing data: $e');
     } finally {
       setState(() {
         _isRefreshing = false;

@@ -1,6 +1,6 @@
 // screens/user_profile_screen.dart
 
-// ignore_for_file: unused_field, deprecated_member_use
+// ignore_for_file: unused_field, deprecated_member_use, prefer_final_fields
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -527,9 +527,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                       _currentUser!.username;
                                   _emailController.text = _currentUser!.email;
                                   _firstNameController.text =
-                                      _currentUser!.firstName ?? '';
+                                      _currentUser!.firstName;
                                   _lastNameController.text =
-                                      _currentUser!.lastName ?? '';
+                                      _currentUser!.lastName;
                                 },
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.symmetric(vertical: 16.h),
