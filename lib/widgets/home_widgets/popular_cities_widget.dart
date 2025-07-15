@@ -16,10 +16,11 @@ class PopularCitiesWidget extends StatefulWidget {
   const PopularCitiesWidget({super.key});
 
   @override
-  State<PopularCitiesWidget> createState() => _PopularCitiesWidgetState();
+  State<PopularCitiesWidget> createState() => PopularCitiesWidgetState();
 }
 
-class _PopularCitiesWidgetState extends State<PopularCitiesWidget> {
+class PopularCitiesWidgetState extends State<PopularCitiesWidget> {
+  
   List<PopularCity> _popularCities = [];
   bool _isLoading = true;
   String _errorMessage = '';
@@ -36,7 +37,10 @@ class _PopularCitiesWidgetState extends State<PopularCitiesWidget> {
     _loadPopularCities();
     _setupAutoScroll();
   }
-
+// Add this method for refresh functionality
+Future<void> refreshPopularCities() async {
+  await _loadPopularCities();
+}
   @override
   void dispose() {
     _autoScrollTimer?.cancel();

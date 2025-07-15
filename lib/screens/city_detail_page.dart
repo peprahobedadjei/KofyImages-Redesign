@@ -23,6 +23,10 @@ class CityDetailPage extends StatefulWidget {
 
 class _CityDetailPageState extends State<CityDetailPage>
     with WidgetsBindingObserver {
+
+      Future<void> _refreshCityDetails() async {
+  await _loadCityDetails();
+}
   CityDetail? cityDetail;
   bool isLoading = true;
   String errorMessage = '';
@@ -167,143 +171,146 @@ class _CityDetailPageState extends State<CityDetailPage>
   Widget _buildCityDetailContent() {
     if (cityDetail == null) return const SizedBox.shrink();
 
-    return CustomScrollView(
-      slivers: [
-        // Hero Section
-        SliverAppBar(
-          expandedHeight: 400.h,
-          floating: false,
-          pinned: true,
-          backgroundColor: Colors.black,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          flexibleSpace: FlexibleSpaceBar(
-            background: Stack(
-              fit: StackFit.expand,
-              children: [
-                // City background image
-                cityDetail!.thumbnailUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: cityDetail!.thumbnailUrl,
-                        fit: BoxFit.cover,
-                        memCacheWidth: 800,
-                        memCacheHeight: 600,
-                        placeholder: (context, url) => Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.black,
+    return RefreshIndicator(
+       onRefresh: _refreshCityDetails,
+      child: CustomScrollView(
+        slivers: [
+          // Hero Section
+          SliverAppBar(
+            expandedHeight: 400.h,
+            floating: false,
+            pinned: true,
+            backgroundColor: Colors.black,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // City background image
+                  cityDetail!.thumbnailUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: cityDetail!.thumbnailUrl,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 800,
+                          memCacheHeight: 600,
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey[300],
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.black,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey[300],
+                            child: Icon(
+                              Icons.error,
+                              color: Colors.grey[600],
+                              size: 32.sp,
+                            ),
+                          ),
+                        )
+                      : Container(
                           color: Colors.grey[300],
                           child: Icon(
-                            Icons.error,
+                            Icons.location_city,
                             color: Colors.grey[600],
-                            size: 32.sp,
+                            size: 64.sp,
                           ),
                         ),
-                      )
-                    : Container(
-                        color: Colors.grey[300],
-                        child: Icon(
-                          Icons.location_city,
-                          color: Colors.grey[600],
-                          size: 64.sp,
-                        ),
+                  // Gradient overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color.fromARGB(77, 0, 0, 0),
+                          Color.fromARGB(179, 0, 0, 0),
+                        ],
                       ),
-                // Gradient overlay
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color.fromARGB(77, 0, 0, 0),
-                        Color.fromARGB(179, 0, 0, 0),
+                    ),
+                  ),
+                  // City information
+                  Positioned(
+                    bottom: 80.h,
+                    left: 20.w,
+                    right: 20.w,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          cityDetail!.cityPart.isNotEmpty &&
+                                  cityDetail!.countryPart.isNotEmpty
+                              ? 'The City Of ${cityDetail!.cityPart}, ${cityDetail!.countryPart}'
+                              : 'The City Of ${cityDetail!.name}',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1.2,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          'Explore the city of ${cityDetail!.name.isNotEmpty ? cityDetail!.name : widget.cityName} through their foods, lifestyle and festivals.',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Color.fromARGB(230, 255, 255, 255),
+                            height: 1.4,
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
                       ],
                     ),
                   ),
-                ),
-                // City information
-                Positioned(
-                  bottom: 80.h,
-                  left: 20.w,
-                  right: 20.w,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        cityDetail!.cityPart.isNotEmpty &&
-                                cityDetail!.countryPart.isNotEmpty
-                            ? 'The City Of ${cityDetail!.cityPart}, ${cityDetail!.countryPart}'
-                            : 'The City Of ${cityDetail!.name}',
-                        style: GoogleFonts.montserrat(
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1.2,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        'Explore the city of ${cityDetail!.name.isNotEmpty ? cityDetail!.name : widget.cityName} through their foods, lifestyle and festivals.',
-                        style: GoogleFonts.montserrat(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color.fromARGB(230, 255, 255, 255),
-                          height: 1.4,
-                        ),
-                      ),
-                      SizedBox(height: 20.h),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        // Categories Section
-        SliverToBoxAdapter(
-          child: Container(
-            color: Colors.grey[50],
-            padding: EdgeInsets.all(20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Explore Categories',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+          // Categories Section
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.grey[50],
+              padding: EdgeInsets.all(20.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Explore Categories',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  'Discover different aspects of ${cityDetail!.name.isNotEmpty ? cityDetail!.name : widget.cityName}',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey[600],
+                  SizedBox(height: 8.h),
+                  Text(
+                    'Discover different aspects of ${cityDetail!.name.isNotEmpty ? cityDetail!.name : widget.cityName}',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
+                    ),
                   ),
-                ),
-                SizedBox(height: 24.h),
-                // Categories Grid or Empty State
-                cityDetail!.categories.isNotEmpty
-                    ? _buildCategoriesGrid()
-                    : _buildEmptyState(),
-              ],
+                  SizedBox(height: 24.h),
+                  // Categories Grid or Empty State
+                  cityDetail!.categories.isNotEmpty
+                      ? _buildCategoriesGrid()
+                      : _buildEmptyState(),
+                ],
+              ),
             ),
           ),
-        ),
-        const SliverToBoxAdapter(child: FooterWidget()),
-      ],
+          const SliverToBoxAdapter(child: FooterWidget()),
+        ],
+      ),
     );
   }
 

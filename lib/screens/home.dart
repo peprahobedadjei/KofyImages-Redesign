@@ -20,16 +20,78 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _isRefreshing = false;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _citiesWidgetKey = GlobalKey();
   String _searchQuery = '';
   List<City> _allCities = []; // Store all cities for search comparison
   bool _citiesLoaded = false;
-
+  final GlobalKey<CitiesWidgetState> _citiesWidgetStateKey =
+      GlobalKey<CitiesWidgetState>();
+  final GlobalKey<HeroSectionState> _heroSectionStateKey =
+      GlobalKey<HeroSectionState>();
+  final GlobalKey<PopularCitiesWidgetState> _popularCitiesWidgetStateKey =
+      GlobalKey<PopularCitiesWidgetState>();
+  final GlobalKey<PhotosOfWeekWidgetState> _photosOfWeekWidgetStateKey =
+      GlobalKey<PhotosOfWeekWidgetState>();
   @override
   void initState() {
     super.initState();
     _loadCities();
+  }
+
+  Future<void> _refreshData() async {
+    if (_isRefreshing) return;
+
+    setState(() {
+      _isRefreshing = true;
+    });
+
+    try {
+      // Create a list of refresh operations
+      List<Future> refreshOperations = [];
+
+      // Add hero section refresh
+      if (_heroSectionStateKey.currentState != null) {
+        refreshOperations.add(
+          _heroSectionStateKey.currentState!.refreshHeroImages(),
+        );
+      }
+
+      // Add cities data refresh
+      refreshOperations.add(_loadCities());
+
+      // Add cities widget refresh
+      if (_citiesWidgetStateKey.currentState != null) {
+        refreshOperations.add(
+          _citiesWidgetStateKey.currentState!.refreshCities(),
+        );
+      }
+
+      // Add popular cities refresh
+      if (_popularCitiesWidgetStateKey.currentState != null) {
+        refreshOperations.add(
+          _popularCitiesWidgetStateKey.currentState!.refreshPopularCities(),
+        );
+      }
+
+      // Add photos of week refresh
+      if (_photosOfWeekWidgetStateKey.currentState != null) {
+        refreshOperations.add(
+          _photosOfWeekWidgetStateKey.currentState!.refreshPhotos(),
+        );
+      }
+
+      // Wait for all refresh operations to complete
+      await Future.wait(refreshOperations);
+    } catch (e) {
+      // Handle error if needed
+      print('Error refreshing data: $e');
+    } finally {
+      setState(() {
+        _isRefreshing = false;
+      });
+    }
   }
 
   // Load cities for search comparison
@@ -149,25 +211,38 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Stack(
           children: [
             // Scrollable content
-            CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                // Hero Section
-                SliverToBoxAdapter(
-                  child: HeroSection(onSearchSubmitted: _onSearchSubmitted),
-                ),
-                const SliverToBoxAdapter(child: BuyaFrameCard()),
-                const SliverToBoxAdapter(child: PopularCitiesWidget()),
-                const SliverToBoxAdapter(child: PhotosOfWeekWidget()),
-                SliverToBoxAdapter(
-                  child: CitiesWidget(
-                    key: _citiesWidgetKey,
-                    searchQuery: _searchQuery,
-                    parentScrollController: _scrollController,
+            RefreshIndicator(
+              onRefresh: _refreshData,
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // Hero Section
+                  SliverToBoxAdapter(
+                    child: HeroSection(
+                      key: _heroSectionStateKey,
+                      onSearchSubmitted: _onSearchSubmitted,
+                    ),
                   ),
-                ),
-                const SliverToBoxAdapter(child: FooterWidget()),
-              ],
+                  const SliverToBoxAdapter(child: BuyaFrameCard()),
+                  SliverToBoxAdapter(
+                    child: PopularCitiesWidget(
+                      key: _popularCitiesWidgetStateKey,
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: PhotosOfWeekWidget(key: _photosOfWeekWidgetStateKey),
+                  ),
+                  SliverToBoxAdapter(
+                    child: CitiesWidget(
+                      key: _citiesWidgetStateKey,
+                      searchQuery: _searchQuery,
+                      parentScrollController: _scrollController,
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: FooterWidget()),
+                ],
+              ),
             ),
           ],
         ),

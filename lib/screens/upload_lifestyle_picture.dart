@@ -155,6 +155,7 @@ class _UploadLifestylePageState extends State<UploadLifestylePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         title: Text(
           'Select Image Source',
           style: GoogleFonts.montserrat(

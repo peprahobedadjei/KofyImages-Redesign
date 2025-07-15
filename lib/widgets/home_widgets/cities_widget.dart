@@ -16,10 +16,18 @@ class CitiesWidget extends StatefulWidget {
   });
 
   @override
-  State<CitiesWidget> createState() => _CitiesWidgetState();
+  State<CitiesWidget> createState() => CitiesWidgetState();
 }
 
-class _CitiesWidgetState extends State<CitiesWidget> {
+class CitiesWidgetState extends State<CitiesWidget> {
+
+Future<void> refreshCities() async {
+  setState(() {
+    isLoading = true;
+    errorMessage = '';
+  });
+  await _loadCities();
+}
   List<City> allCities = [];
   List<City> filteredCities = [];
   List<City> currentPageCities = [];

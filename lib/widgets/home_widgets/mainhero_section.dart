@@ -10,13 +10,25 @@ class HeroSection extends StatefulWidget {
   
   const HeroSection({super.key, required this.onSearchSubmitted});
 
-  @override
-  State<HeroSection> createState() => _HeroSectionState();
+@override
+State<HeroSection> createState() => HeroSectionState();
 }
 
-class _HeroSectionState extends State<HeroSection> {
+class HeroSectionState extends State<HeroSection> {
   final TextEditingController _searchController = TextEditingController();
   final PageController _pageController = PageController();
+
+  Future<void> refreshHeroImages() async {
+  setState(() {
+    _isLoading = true;
+  });
+  
+  // Cancel existing timer
+  _timer?.cancel();
+  
+  // Reload hero images
+  await _loadHeroImages();
+}
   
   List<String> _heroImages = [];
   int _currentIndex = 0;

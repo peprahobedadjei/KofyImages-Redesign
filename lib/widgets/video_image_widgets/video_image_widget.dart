@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously, unused_local_variable, prefer_final_fields, deprecated_member_use
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,28 +9,97 @@ import 'package:kofyimages/models/city_details_model.dart';
 import 'package:kofyimages/screens/login_page.dart';
 import 'package:kofyimages/screens/register.dart';
 import 'package:kofyimages/services/auth_login.dart';
+import 'package:kofyimages/services/delete_lifestyle.dart';
 import 'package:kofyimages/services/ike_lifestyle_image.dart';
+import 'package:kofyimages/widgets/comments/comment.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoImageWidget extends StatefulWidget {
   final List<ContentItem> content;
+  final VoidCallback? onContentUpdated; // Add callback for content updates
+  final Future<void> Function()? onRefresh; // Add this line
 
-  const VideoImageWidget({super.key, required this.content});
-
+  const VideoImageWidget({
+    super.key,
+    required this.content,
+    this.onContentUpdated,
+    this.onRefresh, // Add this new parameter
+  });
   @override
-  State<VideoImageWidget> createState() => _VideoImageWidgetState();
+  State<VideoImageWidget> createState() => VideoImageWidgetState();
 }
 
-class _VideoImageWidgetState extends State<VideoImageWidget> {
+class VideoImageWidgetState extends State<VideoImageWidget> {
+  // Add this method to your VideoImageWidgetState class:
+  void _showCommentsBottomSheet(BuildContext context, ContentItem item) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CommentsBottomSheet(
+        photoId: item.id.toString(),
+        photoTitle: item.title,
+        onCommentCountChanged: (newCount) {
+          // Update the comment count in the current item
+          final index = _contentItems.indexWhere(
+            (content) => content.id == item.id,
+          );
+          if (index != -1) {
+            final updatedItem = ContentItem(
+              id: item.id,
+              title: item.title,
+              youtubeUrl: item.youtubeUrl,
+              thumbnailUrl: item.thumbnailUrl,
+              imageUrl: item.imageUrl,
+              categoryName: item.categoryName,
+              cityName: item.cityName,
+              createdAt: item.createdAt,
+              content: item.content,
+              creatorName: item.creatorName,
+              isPhotoOfWeek: item.isPhotoOfWeek,
+              likesCount: item.likesCount,
+              commentsCount: newCount, // Update with new count
+              likedByUser: item.likedByUser,
+              user: item.user,
+            );
+
+            setState(() {
+              _contentItems[index] = updatedItem;
+            });
+          }
+        },
+      ),
+    );
+  }
+
+  /// Refresh the content by reloading from the original source
+  Future<void> refreshContent() async {
+    // If there's an onRefresh callback, call it
+    if (widget.onRefresh != null) {
+      await widget.onRefresh!();
+    }
+
+    // Reload current user in case auth state changed
+    await _loadCurrentUser();
+
+    // Reset content to original
+    setState(() {
+      _contentItems = List.from(widget.content);
+    });
+  }
+
   // Keep track of content items and their loading states
   late List<ContentItem> _contentItems;
   Set<int> _likingItems = {}; // Track which items are currently being liked
+  Set<int> _deletingItems = {}; // Track which items are currently being deleted
+  String? _currentUsername; // Store current user's username
 
   @override
   void initState() {
     super.initState();
     _contentItems = List.from(widget.content);
+    _loadCurrentUser();
   }
 
   @override
@@ -40,6 +107,19 @@ class _VideoImageWidgetState extends State<VideoImageWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.content != widget.content) {
       _contentItems = List.from(widget.content);
+    }
+  }
+
+  /// Load current user's username
+  Future<void> _loadCurrentUser() async {
+    try {
+      final username = await AuthLoginService.getUserDisplayName();
+      setState(() {
+        _currentUsername = username;
+      });
+    } catch (e) {
+      // User not logged in or error getting username
+      _currentUsername = null;
     }
   }
 
@@ -125,6 +205,7 @@ class _VideoImageWidgetState extends State<VideoImageWidget> {
             : (item.likesCount ?? 1) - 1,
         commentsCount: item.commentsCount,
         likedByUser: isLiked,
+        user: item.user,
       );
 
       setState(() {
@@ -167,6 +248,122 @@ class _VideoImageWidgetState extends State<VideoImageWidget> {
     }
   }
 
+  /// Handle delete button tap for lifestyle images
+  Future<void> _handleDeleteTap(int index) async {
+    final item = _contentItems[index];
+
+    // Show confirmation dialog
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(
+          'Delete Image',
+          style: GoogleFonts.montserrat(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${item.title}"? This action cannot be undone.',
+          style: GoogleFonts.montserrat(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.montserrat(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.montserrat(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.red,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    if (_deletingItems.contains(index)) return; // Prevent multiple requests
+
+    setState(() {
+      _deletingItems.add(index);
+    });
+
+    try {
+      // Delete the lifestyle image
+      await DeleteLifestyleImageService.deleteLifestyleImage(
+        item.id.toString(),
+      );
+
+      // Remove the item from the list
+      setState(() {
+        _contentItems.removeAt(index);
+      });
+
+      // Call the callback to notify parent widget
+      if (widget.onContentUpdated != null) {
+        widget.onContentUpdated!();
+      }
+
+      // Show success feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Image deleted successfully!',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to delete image: ${e.toString()}',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          duration: Duration(seconds: 3),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _deletingItems.remove(index);
+      });
+    }
+  }
+
+  /// Check if current user can delete this image
+  bool _canDeleteImage(ContentItem item) {
+    if (_currentUsername == null || item.user == null) return false;
+    return _currentUsername == item.user!.username;
+  }
+
   /// Get list of image URLs and their corresponding indices (excluding videos)
   List<Map<String, dynamic>> _getImageList() {
     List<Map<String, dynamic>> imageList = [];
@@ -188,30 +385,30 @@ class _VideoImageWidgetState extends State<VideoImageWidget> {
   @override
   Widget build(BuildContext context) {
     if (_contentItems.isEmpty) {
-    return Center(
-      child: Column(
-        children: [
-          Icon(Icons.category_outlined, size: 64.sp, color: Colors.grey[400]),
-          SizedBox(height: 16.h),
-          Text(
-            'No content available',
-            style: GoogleFonts.montserrat(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+      return Center(
+        child: Column(
+          children: [
+            Icon(Icons.category_outlined, size: 64.sp, color: Colors.grey[400]),
+            SizedBox(height: 16.h),
+            Text(
+              'No content available',
+              style: GoogleFonts.montserrat(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
             ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Contents for this category is coming soon',
-            style: GoogleFonts.montserrat(
-              fontSize: 14.sp,
-              color: Colors.grey[500],
+            SizedBox(height: 8.h),
+            Text(
+              'Contents for this category is coming soon',
+              style: GoogleFonts.montserrat(
+                fontSize: 14.sp,
+                color: Colors.grey[500],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
     }
 
     return Column(
@@ -221,6 +418,7 @@ class _VideoImageWidgetState extends State<VideoImageWidget> {
         final item = entry.value;
         final isVideo = item.youtubeUrl != null && item.youtubeUrl!.isNotEmpty;
         final isLifestyleImage = !isVideo;
+        final canDelete = _canDeleteImage(item);
 
         return Card(
           margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
@@ -232,76 +430,115 @@ class _VideoImageWidgetState extends State<VideoImageWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image/Video Section
-              GestureDetector(
-                onTap: () {
-                  if (isVideo) {
-                    final videoId = YoutubePlayer.convertUrlToId(
-                      item.youtubeUrl!,
-                    );
-                    if (videoId != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ConnectionListener(
-                            child: YoutubePlayerPage(videoId: videoId),
-                          ),
-                        ),
-                      );
-                    }
-                  } else if (item.imageUrl != null) {
-                    // Get the list of images and find the current image index
-                    final imageList = _getImageList();
-                    final currentImageIndex = imageList.indexWhere(
-                      (img) => img['originalIndex'] == index,
-                    );
-                    
-                    if (currentImageIndex != -1) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ConnectionListener(
-                            child: ImageGalleryPage(
-                              imageList: imageList,
-                              initialIndex: currentImageIndex,
+              // Image/Video Section with delete button overlay
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (isVideo) {
+                        final videoId = YoutubePlayer.convertUrlToId(
+                          item.youtubeUrl!,
+                        );
+                        if (videoId != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ConnectionListener(
+                                child: YoutubePlayerPage(videoId: videoId),
+                              ),
+                            ),
+                          );
+                        }
+                      } else if (item.imageUrl != null) {
+                        // Get the list of images and find the current image index
+                        final imageList = _getImageList();
+                        final currentImageIndex = imageList.indexWhere(
+                          (img) => img['originalIndex'] == index,
+                        );
+
+                        if (currentImageIndex != -1) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ConnectionListener(
+                                child: ImageGalleryPage(
+                                  imageList: imageList,
+                                  initialIndex: currentImageIndex,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: isVideo
+                              ? item.thumbnailUrl ?? ''
+                              : item.imageUrl ?? '',
+                          height: 250.h,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 800,
+                          memCacheHeight: 600,
+                          placeholder: (_, __) => Container(
+                            height: 250.h,
+                            color: Colors.grey[300],
+                            child: const Center(
+                              child: CircularProgressIndicator(),
                             ),
                           ),
+                          errorWidget: (_, __, ___) => Container(
+                            height: 250.h,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.broken_image),
+                          ),
                         ),
-                      );
-                    }
-                  }
-                },
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: isVideo
-                          ? item.thumbnailUrl ?? ''
-                          : item.imageUrl ?? '',
-                      height: 250.h,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      memCacheWidth: 800,
-                      memCacheHeight: 600,
-                      placeholder: (_, __) => Container(
-                        height: 250.h,
-                        color: Colors.grey[300],
-                        child: const Center(child: CircularProgressIndicator()),
-                      ),
-                      errorWidget: (_, __, ___) => Container(
-                        height: 250.h,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.broken_image),
+                        if (isVideo)
+                          Icon(
+                            Icons.play_circle_fill,
+                            color: Colors.redAccent,
+                            size: 64.sp,
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  // Delete button - only show for lifestyle images that belong to current user
+                  if (isLifestyleImage && canDelete)
+                    Positioned(
+                      top: 8.h,
+                      right: 8.w,
+                      child: GestureDetector(
+                        onTap: () => _handleDeleteTap(index),
+                        child: Container(
+                          padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: _deletingItems.contains(index)
+                              ? SizedBox(
+                                  width: 20.sp,
+                                  height: 20.sp,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.0,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                  size: 20.sp,
+                                ),
+                        ),
                       ),
                     ),
-                    if (isVideo)
-                      Icon(
-                        Icons.play_circle_fill,
-                        color: Colors.redAccent,
-                        size: 64.sp,
-                      ),
-                  ],
-                ),
+                ],
               ),
 
               // Content Section (Title, Creator, and Actions)
@@ -409,10 +646,8 @@ class _VideoImageWidgetState extends State<VideoImageWidget> {
 
                           // Comment button
                           GestureDetector(
-                            onTap: () {
-                              // Handle comment action
-                              // You can implement comment functionality here
-                            },
+                            onTap: () =>
+                                _showCommentsBottomSheet(context, item),
                             child: Row(
                               children: [
                                 Icon(
@@ -575,7 +810,9 @@ class _ImageGalleryPageState extends State<ImageGalleryPage> {
                   imageProvider: CachedNetworkImageProvider(
                     imageData['imageUrl'],
                   ),
-                  backgroundDecoration: const BoxDecoration(color: Colors.black),
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.black,
+                  ),
                   loadingBuilder: (context, event) => const Center(
                     child: CircularProgressIndicator(color: Colors.white),
                   ),
@@ -627,10 +864,7 @@ class _ImageGalleryPageState extends State<ImageGalleryPage> {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.transparent,
-                  ],
+                  colors: [Colors.black.withOpacity(0.8), Colors.transparent],
                 ),
               ),
               padding: EdgeInsets.all(20.w),
@@ -709,41 +943,6 @@ class _ImageGalleryPageState extends State<ImageGalleryPage> {
                 ),
               ),
             ),
-        ],
-      ),
-    );
-  }
-}
-
-// Keep the original FullImagePage as backup (you can remove this if not needed)
-class FullImagePage extends StatelessWidget {
-  final String imageUrl;
-
-  const FullImagePage({super.key, required this.imageUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          Center(
-            child: PhotoView(
-              imageProvider: CachedNetworkImageProvider(imageUrl),
-              backgroundDecoration: const BoxDecoration(color: Colors.black),
-              loadingBuilder: (context, event) => const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 40.h,
-            left: 10.w,
-            child: IconButton(
-              icon: Icon(Icons.close, color: Colors.white, size: 30.sp),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
         ],
       ),
     );

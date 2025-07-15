@@ -10,14 +10,16 @@ class PhotosOfWeekWidget extends StatefulWidget {
   const PhotosOfWeekWidget({super.key});
 
   @override
-  State<PhotosOfWeekWidget> createState() => _PhotosOfWeekWidgetState();
+  State<PhotosOfWeekWidget> createState() => PhotosOfWeekWidgetState();
 }
 
-class _PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
+class PhotosOfWeekWidgetState extends State<PhotosOfWeekWidget> {
   List<PhotoOfWeek> photos = [];
   bool isLoading = true;
   bool hasError = false;
-
+Future<void> refreshPhotos() async {
+  await _fetchPhotos();
+}
   @override
   void initState() {
     super.initState();

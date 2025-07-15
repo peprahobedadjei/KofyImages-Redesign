@@ -9,7 +9,6 @@ import 'package:kofyimages/services/get_city_photo.dart';
 import 'package:kofyimages/widgets/article_widgets/article_widget.dart';
 import 'package:kofyimages/widgets/footer/footer_widget.dart';
 import 'dart:async';
-
 import 'package:kofyimages/widgets/video_image_widgets/video_image_widget.dart';
 
 class CategoryDetailPage extends StatefulWidget {
@@ -45,6 +44,33 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
     _pageController.dispose();
     super.dispose();
   }
+
+/// Handle pull-to-refresh
+Future<void> _onRefresh() async {
+  // Stop auto-scroll during refresh
+  _stopAutoScroll();
+  
+  // Reset current page
+  setState(() {
+    _currentPage = 0;
+  });
+  
+  // Reset page controller to first page
+  if (_pageController.hasClients) {
+    _pageController.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+  
+  // Fetch fresh data
+  await _fetchCityPhotos();
+  
+  
+  // Restart auto-scroll
+  _startAutoScroll();
+}
 
   /// Initialize the page by fetching city photos
   Future<void> _initializePage() async {
@@ -174,47 +200,53 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
   Widget _buildCategoryDetailContent(BuildContext context) {
     final categoryContent = _getCategoryContent();
 
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          expandedHeight: 400.h,
-          floating: false,
-          pinned: true,
-          backgroundColor: Colors.black,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          flexibleSpace: FlexibleSpaceBar(
-            background: _buildCarouselSection(categoryContent),
-          ),
-        ),
-        // Categories Section
-        SliverToBoxAdapter(
-          child: Container(
-            color: Colors.grey[50],
-            child: Column(
-              children: [
-                if (widget.category.name.toLowerCase() == 'articles') ...[
-                  ArticleWidget(content: widget.category.content),
-                ] else ...[
-                  Padding(
-                    padding: EdgeInsets.all(20.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        VideoImageWidget(content: widget.category.content),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 400.h,
+            floating: false,
+            pinned: true,
+            backgroundColor: Colors.black,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: _buildCarouselSection(categoryContent),
             ),
           ),
-        ),
+          // Categories Section
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.grey[50],
+              child: Column(
+                children: [
+                  if (widget.category.name.toLowerCase() == 'articles') ...[
+                    ArticleWidget(content: widget.category.content),
+                  ] else ...[
+                    Padding(
+                      padding: EdgeInsets.all(20.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+VideoImageWidget(
+  content: widget.category.content,
+  onRefresh: _onRefresh,
+),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
 
-        const SliverToBoxAdapter(child: FooterWidget()),
-      ],
+          const SliverToBoxAdapter(child: FooterWidget()),
+        ],
+      ),
     );
   }
 

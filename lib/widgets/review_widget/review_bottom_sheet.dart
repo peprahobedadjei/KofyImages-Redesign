@@ -35,13 +35,114 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
   bool _isLoading = true;
   bool _isPosting = false;
   bool _isReviewed = false;
+  String? _currentUsername;
 
   @override
   void initState() {
     super.initState();
     _isReviewed = widget.isReviewed;
     _loadUserState();
+    _loadCurrentUser();
     _fetchReviews();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final username = await AuthLoginService.getUserDisplayName();
+      setState(() {
+        _currentUsername = username;
+      });
+    } catch (e) {
+      // User not logged in or error getting username
+      _currentUsername = null;
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(int reviewId) async {
+    final bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(
+            'Delete Review',
+            style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Are you sure you want to delete this review? This action cannot be undone.',
+            style: GoogleFonts.montserrat(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.montserrat(color: Colors.grey[600]),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text(
+                'Delete',
+                style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      await _deleteReview(reviewId);
+    }
+  }
+
+  Future<void> _deleteReview(int reviewId) async {
+    try {
+      final response = await AuthLoginService.makeAuthenticatedRequest(
+        url:
+            "https://kofyimages-9dae18892c9f.herokuapp.com/api/cities/${widget.cityName}/reviews/$reviewId/", // You'll need to add this endpoint
+        method: 'DELETE',
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Refresh reviews list
+        await _fetchReviews();
+
+        // Update review count
+        if (widget.onReviewCountChanged != null) {
+          widget.onReviewCountChanged!(_reviews.length);
+        }
+
+        // Update review status if current user deleted their review
+        if (widget.onReviewStatusChanged != null) {
+          widget.onReviewStatusChanged!(false);
+        }
+
+        setState(() {
+          _isReviewed = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Review deleted successfully!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to delete review')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Something went wrong')));
+    }
   }
 
   Future<void> _loadUserState() async {
@@ -126,7 +227,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
     }
   }
 
-    Widget _buildUserAvatar(String username) {
+  Widget _buildUserAvatar(String username) {
     final firstLetter = username.isNotEmpty ? username[0].toUpperCase() : 'U';
     final colors = [
       Colors.blue,
@@ -139,7 +240,6 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
       Colors.pink,
     ];
     final color = colors[username.hashCode % colors.length];
-
 
     return CircleAvatar(
       radius: 18.r,
@@ -160,11 +260,11 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-              border: Border.all(color: Colors.grey[700]!),
-borderRadius: BorderRadius.only(
-  topLeft: Radius.circular(20.r),
-  topRight: Radius.circular(20.r),
-),
+        border: Border.all(color: Colors.grey[700]!),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20.r),
+          topRight: Radius.circular(20.r),
+        ),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -186,45 +286,70 @@ borderRadius: BorderRadius.only(
 
           _isLoading
               ? Center(child: CircularProgressIndicator())
-                    : _reviews.isEmpty
-                    ? Container(
-                        padding: EdgeInsets.all(32.h),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.rate_review_outlined,
-                              size: 48.sp,
-                              color: Colors.grey[400],
-                            ),
-                            SizedBox(height: 12.h),
-                            Text(
-                              'Be the first to make a post!',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
+              : _reviews.isEmpty
+              ? Container(
+                  padding: EdgeInsets.all(32.h),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.rate_review_outlined,
+                        size: 48.sp,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        'Be the first to make a post!',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
                         ),
-                      )
+                      ),
+                    ],
+                  ),
+                )
               : SizedBox(
                   height: 300.h,
                   child: ListView.builder(
                     itemCount: _reviews.length,
                     itemBuilder: (context, index) {
                       final review = _reviews[index];
-                      final username = _reviews[index]['user']['username'] ?? 'User';
+                      final username =
+                          _reviews[index]['user']['username'] ?? 'User';
                       return ListTile(
                         title: Text(
                           review['user']['username'] ?? 'User',
                           style: GoogleFonts.montserrat(
                             fontWeight: FontWeight.w600,
                           ),
-                        
                         ),
-                        leading:  _buildUserAvatar(username),
-                        trailing: Text(timeAgo(review['created_at'])),
+                        leading: _buildUserAvatar(username),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(timeAgo(review['created_at'])),
+                            if (_currentUsername ==
+                                review['user']['username']) ...[
+                              SizedBox(height: 4.h),
+                              GestureDetector(
+                                onTap: () =>
+                                    _showDeleteConfirmation(review['id']),
+                                child: Container(
+                                  padding: EdgeInsets.all(6.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.delete_outline,
+                                    size: 20.sp,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                         subtitle: Text(review['content']),
                       );
                     },
@@ -236,7 +361,7 @@ borderRadius: BorderRadius.only(
           // Show input field only if user is logged in AND hasn't reviewed yet
           if (_isLoggedIn && !_isReviewed) ...[
             Padding(
-               padding: const EdgeInsets.fromLTRB(0, 0, 0, 25),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 25),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -288,7 +413,7 @@ borderRadius: BorderRadius.only(
           ] else if (_isLoggedIn && _isReviewed) ...[
             // Show message when user has already reviewed
             Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 25),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 25),
               child: Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
@@ -351,19 +476,18 @@ borderRadius: BorderRadius.only(
                         ),
                       ),
                     ],
-                    
                   ),
                 ),
               ),
             ),
           ],
-              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
         ],
-        
       ),
     );
   }
 }
+
 String timeAgo(String? isoDateString) {
   final now = DateTime.now().toUtc();
   final dateTime = DateTime.parse(isoDateString!).toUtc();

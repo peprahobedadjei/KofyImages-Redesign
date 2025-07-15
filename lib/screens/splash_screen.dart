@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kofyimages/screens/home.dart';
 import 'package:kofyimages/constants/network_monitor.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -48,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (NetworkMonitor.isConnected.value && mounted) {
       // Remove listener to avoid memory leaks
       NetworkMonitor.isConnected.removeListener(_onConnectivityChanged);
-      
+
       // Navigate to home page when connection is restored
       Navigator.pushReplacement(
         context,
@@ -66,8 +68,24 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+    return Scaffold(
+      body: Center(
+        child: AnimatedTextKit(
+          repeatForever: true,
+          pause: Duration(milliseconds: 2000),
+          animatedTexts: [
+            TypewriterAnimatedText(
+              'KofyImages……Explore Cities through Pictures',
+              textStyle: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w600
+              ),
+              speed: Duration(milliseconds: 100),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

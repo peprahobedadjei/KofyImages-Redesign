@@ -189,63 +189,66 @@ class _FrameShopPageState extends State<FrameShopPage> {
 
           // Content
           Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 48.sp,
-                          color: Colors.red,
-                        ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          'Error loading frames',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
+            child: RefreshIndicator(
+               onRefresh: _fetchData,
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : errorMessage != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 48.sp,
+                            color: Colors.red,
                           ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          errorMessage!,
-                          style: GoogleFonts.montserrat(
-                            fontSize: 14.sp,
-                            color: Colors.grey[600],
+                          SizedBox(height: 16.h),
+                          Text(
+                            'Error loading frames',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 16.h),
-                        ElevatedButton(
-                          onPressed: _fetchData,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  )
-                : currentFrames.isEmpty
-                ? Center(
-                    child: Text(
-                      'No ${currentFrameType.toLowerCase()} frames available',
-                      style: GoogleFonts.montserrat(
-                        fontSize: 16.sp,
-                        color: Colors.grey[600],
+                          SizedBox(height: 8.h),
+                          Text(
+                            errorMessage!,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14.sp,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 16.h),
+                          ElevatedButton(
+                            onPressed: _fetchData,
+                            child: const Text('Retry'),
+                          ),
+                        ],
                       ),
+                    )
+                  : currentFrames.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No ${currentFrameType.toLowerCase()} frames available',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16.sp,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.all(20.w),
+                      itemCount: currentFrames.length,
+                      itemBuilder: (context, index) {
+                        return FrameCard(
+                          frameItem: currentFrames[index],
+                          frameType: currentFrameType,
+                        );
+                      },
                     ),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.all(20.w),
-                    itemCount: currentFrames.length,
-                    itemBuilder: (context, index) {
-                      return FrameCard(
-                        frameItem: currentFrames[index],
-                        frameType: currentFrameType,
-                      );
-                    },
-                  ),
+            ),
           ),
         ],
       ),

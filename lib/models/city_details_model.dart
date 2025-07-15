@@ -27,7 +27,6 @@ class CityDetail {
         categoriesMap[key] = Category.fromJson(value);
       });
     }
-
     return CityDetail(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
@@ -92,6 +91,38 @@ class CityInfo {
   }
 }
 
+class User {
+  final int id;
+  final String username;
+  final String email;
+  final String firstName;
+  final String lastName;
+  final String dateJoined;
+  final bool isStaff;
+
+  User({
+    required this.id,
+    required this.username,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.dateJoined,
+    required this.isStaff,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] ?? 0,
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      dateJoined: json['date_joined'] ?? '',
+      isStaff: json['is_staff'] ?? false,
+    );
+  }
+}
+
 class ContentItem {
   final int id;
   final String title;
@@ -107,6 +138,7 @@ class ContentItem {
   final int? likesCount;
   final int? commentsCount;
   final bool? likedByUser;
+  final User? user; // Added user field
 
   ContentItem({
     required this.id,
@@ -123,6 +155,7 @@ class ContentItem {
     this.likedByUser,
     this.likesCount,
     this.commentsCount,
+    this.user,
   });
 
   factory ContentItem.fromJson(Map<String, dynamic> json) {
@@ -141,6 +174,7 @@ class ContentItem {
       likesCount: json['likes_count'],
       commentsCount: json['comments_count'],
       likedByUser: json['liked_by_user'],
+      user: json['user'] != null ? User.fromJson(json['user']) : null,
     );
   }
 }
