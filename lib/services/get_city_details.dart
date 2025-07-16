@@ -11,25 +11,13 @@ class GetCityDetailsService {
   /// authenticated client; otherwise it falls back to the public endpoint.
   static Future<CityDetail> getCityDetails(String cityName) async {
     try {
-      final bool loggedIn = await AuthLoginService.isLoggedIn();
-
       http.Response response;
 
-      if (loggedIn) {
-        // Authenticated request (token handled inside AuthLoginService)
-        response = await AuthLoginService.makeAuthenticatedRequest(
-          url: ApiEndpoints.getCityDetails(cityName),
-          method: 'GET',
-        );
-      } else {
-        // Unauthenticated fallback
-        response = await http.get(
-          Uri.parse(ApiEndpoints.getCityDetails(cityName)),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        );
-      }
+      // Unauthenticated fallback
+      response = await http.get(
+        Uri.parse(ApiEndpoints.getCityDetails(cityName)),
+        headers: {'Content-Type': 'application/json'},
+      );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
