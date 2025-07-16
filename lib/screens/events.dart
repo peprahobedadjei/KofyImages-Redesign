@@ -647,7 +647,7 @@ class _EventsPageState extends State<EventsPage> {
                 SizedBox(height: 8.h),
                 // Event Location & Date
                 Text(
-                  'By ${event.city}, ${event.country}',
+                  '${event.city}, ${event.country}',
                   style: GoogleFonts.montserrat(
                     fontSize: 14.sp,
                     color: Colors.grey[600],

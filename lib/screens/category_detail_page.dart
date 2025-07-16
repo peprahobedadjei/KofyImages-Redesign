@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,6 +12,17 @@ import 'package:kofyimages/widgets/article_widgets/article_widget.dart';
 import 'package:kofyimages/widgets/footer/footer_widget.dart';
 import 'dart:async';
 import 'package:kofyimages/widgets/video_image_widgets/video_image_widget.dart';
+
+class CategoryContent {
+  final String categoryName;
+  final List<dynamic> content;
+
+  CategoryContent({required this.categoryName, required this.content});
+
+  factory CategoryContent.fromJson(String name, Map<String, dynamic> json) {
+    return CategoryContent(categoryName: name, content: json['content'] ?? []);
+  }
+}
 
 class CategoryDetailPage extends StatefulWidget {
   final Category category;
@@ -45,32 +58,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
     super.dispose();
   }
 
-/// Handle pull-to-refresh
-Future<void> _onRefresh() async {
-  // Stop auto-scroll during refresh
-  _stopAutoScroll();
-  
-  // Reset current page
-  setState(() {
-    _currentPage = 0;
-  });
-  
-  // Reset page controller to first page
-  if (_pageController.hasClients) {
-    _pageController.animateToPage(
-      0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-  
-  // Fetch fresh data
-  await _fetchCityPhotos();
-  
-  
-  // Restart auto-scroll
-  _startAutoScroll();
-}
+
 
   /// Initialize the page by fetching city photos
   Future<void> _initializePage() async {
@@ -146,6 +134,52 @@ Future<void> _onRefresh() async {
     _startAutoScroll();
   }
 
+Category? _refreshedCategory;
+
+Future<void> _onRefresh() async {
+ _stopAutoScroll();
+ setState(() {
+ _currentPage = 0;
+ });
+
+ if (_pageController.hasClients) {
+ _pageController.animateToPage(
+ 0,
+ duration: const Duration(milliseconds: 300),
+ curve: Curves.easeInOut,
+ );
+ }
+
+ await _fetchCityPhotos();
+
+ final response = await http.get(Uri.parse(
+ 'https://kofyimages-9dae18892c9f.herokuapp.com/api/cities/${widget.cityDetail?.name}/content/', ));
+
+if (response.statusCode == 200) {
+ final data = jsonDecode(response.body);
+ final categoriesJson = data['categories'] as Map<String, dynamic>;
+
+ // Find the updated category by name
+ final updatedCategoryEntry = categoriesJson.entries.firstWhere(
+ (entry) =>
+ entry.key.toLowerCase() ==
+ widget.category.name.toLowerCase(),
+ orElse: () => MapEntry('', {}));
+
+ if (updatedCategoryEntry.key.isNotEmpty) {
+ final updatedCategory = Category.fromJson(updatedCategoryEntry.value);
+
+setState(() {
+ _refreshedCategory = updatedCategory;
+ });
+ }
+ }
+
+ _startAutoScroll();
+}
+
+
+
   /// Get category-specific content
   Map<String, String> _getCategoryContent() {
     final cityName = widget.cityDetail?.name ?? 'this city';
@@ -187,6 +221,8 @@ Future<void> _onRefresh() async {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,6 +235,7 @@ Future<void> _onRefresh() async {
 
   Widget _buildCategoryDetailContent(BuildContext context) {
     final categoryContent = _getCategoryContent();
+    final content = _refreshedCategory?.content ?? widget.category.content;
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
@@ -224,17 +261,17 @@ Future<void> _onRefresh() async {
               child: Column(
                 children: [
                   if (widget.category.name.toLowerCase() == 'articles') ...[
-                    ArticleWidget(content: widget.category.content),
+                    ArticleWidget(content: content),
                   ] else ...[
                     Padding(
                       padding: EdgeInsets.all(20.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-VideoImageWidget(
-  content: widget.category.content,
-  onRefresh: _onRefresh,
-),
+    VideoImageWidget(
+    content: content,
+    onRefresh: _onRefresh,
+  ),
                         ],
                       ),
                     ),
