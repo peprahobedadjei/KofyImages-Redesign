@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kofyimages/constants/custom_appbar.dart';
 import 'package:kofyimages/constants/sidedrawer.dart';
 import 'package:kofyimages/models/city_details_model.dart';
+import 'package:kofyimages/services/auth_login.dart';
 import 'package:kofyimages/services/get_city_photo.dart';
 import 'package:kofyimages/widgets/article_widgets/article_widget.dart';
 import 'package:kofyimages/widgets/footer/footer_widget.dart';
@@ -136,46 +137,134 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
 
 Category? _refreshedCategory;
 
+
 Future<void> _onRefresh() async {
- _stopAutoScroll();
- setState(() {
- _currentPage = 0;
- });
+  _stopAutoScroll();
+  setState(() {
+    _currentPage = 0;
+  });
+  
+  if (_pageController.hasClients) {
+    _pageController.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+  
+  await _fetchCityPhotos();
+  
+  try {
+    http.Response response;
+    
+    // Check if user is logged in first
+    final isLoggedIn = await AuthLoginService.isLoggedIn();
+    
+    if (isLoggedIn) {
+      // Check token validity by hitting the token validation endpoint
+      final tokenValid = await _checkTokenValidity();
+      
+      if (tokenValid) {
+        // Token is valid, use authenticated endpoint
+        response = await _getCityContentAuthenticated();
+      } else {
+        // Token is invalid, logout and use public endpoint
+        await AuthLoginService.logout();
+        response = await _getCityContentPublic();
+      }
+    } else {
+      // User not logged in, use public endpoint
+      response = await _getCityContentPublic();
+    }
 
- if (_pageController.hasClients) {
- _pageController.animateToPage(
- 0,
- duration: const Duration(milliseconds: 300),
- curve: Curves.easeInOut,
- );
- }
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final categoriesJson = data['categories'] as Map<String, dynamic>;
+      
+      // Find the updated category by name
+      final updatedCategoryEntry = categoriesJson.entries.firstWhere(
+        (entry) =>
+          entry.key.toLowerCase() ==
+          widget.category.name.toLowerCase(),
+        orElse: () => MapEntry('', {}),
+      );
+      
+      if (updatedCategoryEntry.key.isNotEmpty) {
+        final updatedCategory = Category.fromJson(updatedCategoryEntry.value);
+        setState(() {
+          _refreshedCategory = updatedCategory;
+        });
+      }
+    }
+  } catch (e) {
+    // Handle any errors during the refresh process
+    print('Error during refresh: $e');
+    // You might want to show a snackbar or toast to inform the user
+  }
+  
+  _startAutoScroll();
+}
 
- await _fetchCityPhotos();
+/// Check if access token is valid by calling the token validation endpoint
+Future<bool> _checkTokenValidity() async {
+  try {
+    final accessToken = await AuthLoginService.getAccessToken();
+    
+    if (accessToken == null) {
+      return false;
+    }
 
- final response = await http.get(Uri.parse(
- 'https://kofyimages-9dae18892c9f.herokuapp.com/api/cities/${widget.cityDetail?.name}/content/', ));
+    final response = await http.get(
+      Uri.parse('https://kofyimages-9dae18892c9f.herokuapp.com/api/token/access/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
 
-if (response.statusCode == 200) {
- final data = jsonDecode(response.body);
- final categoriesJson = data['categories'] as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      return responseData['valid'] == true;
+    } else if (response.statusCode == 401) {
+      final errorData = jsonDecode(response.body);
+      if (errorData['code'] == 'token_not_valid') {
+        return false;
+      }
+    }
+    
+    // For any other status codes, assume token is invalid
+    return false;
+  } catch (e) {
+    // If any error occurs during token validation, assume token is invalid
+    return false;
+  }
+}
 
- // Find the updated category by name
- final updatedCategoryEntry = categoriesJson.entries.firstWhere(
- (entry) =>
- entry.key.toLowerCase() ==
- widget.category.name.toLowerCase(),
- orElse: () => MapEntry('', {}));
+/// Get city content using authenticated endpoint
+Future<http.Response> _getCityContentAuthenticated() async {
+  final accessToken = await AuthLoginService.getAccessToken();
+  
+  return await http.get(
+    Uri.parse(
+      'https://kofyimages-9dae18892c9f.herokuapp.com/api/cities/${widget.cityDetail?.name}/content/authenticated/', // Authenticated endpoint
+    ),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    },
+  );
+}
 
- if (updatedCategoryEntry.key.isNotEmpty) {
- final updatedCategory = Category.fromJson(updatedCategoryEntry.value);
-
-setState(() {
- _refreshedCategory = updatedCategory;
- });
- }
- }
-
- _startAutoScroll();
+/// Get city content using public/unauthenticated endpoint
+Future<http.Response> _getCityContentPublic() async {
+  return await http.get(
+    Uri.parse(
+      'https://kofyimages-9dae18892c9f.herokuapp.com/api/cities/${widget.cityDetail?.name}/content/', // Public endpoint
+    ),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  );
 }
 
 
