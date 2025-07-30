@@ -30,14 +30,9 @@ Future<void> refreshCities() async {
 }
   List<City> allCities = [];
   List<City> filteredCities = [];
-  List<City> currentPageCities = [];
   bool isLoading = true;
   String errorMessage = '';
 
-  // Pagination variables
-  int currentPage = 1;
-  int citiesPerPage = 5;
-  int totalPages = 0;
 
   @override
   void initState() {
@@ -80,22 +75,9 @@ Future<void> refreshCities() async {
           );
         }).toList();
       }
-
-      // Reset to first page when filtering
-      currentPage = 1;
-      totalPages = (filteredCities.length / citiesPerPage).ceil();
-      _updateCurrentPageCities();
     });
   }
 
-  void _updateCurrentPageCities() {
-    final startIndex = (currentPage - 1) * citiesPerPage;
-    final endIndex = (startIndex + citiesPerPage).clamp(
-      0,
-      filteredCities.length,
-    );
-    currentPageCities = filteredCities.sublist(startIndex, endIndex);
-  }
 
   // Add this method to scroll to cities section
   void _scrollToCitiesSection() {
@@ -125,122 +107,9 @@ Future<void> refreshCities() async {
     }
   }
 
-  void _goToPage(int page) {
-    if (page >= 1 && page <= totalPages) {
-      setState(() {
-        currentPage = page;
-        _updateCurrentPageCities();
-      });
 
-      // Scroll to cities section after changing page
-      _scrollToCitiesSection();
-    }
-  }
 
-  void _previousPage() {
-    if (currentPage > 1) {
-      _goToPage(currentPage - 1);
-    }
-  }
 
-  void _nextPage() {
-    if (currentPage < totalPages) {
-      _goToPage(currentPage + 1);
-    }
-  }
-
-  Widget _buildPaginationControls() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 20.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Previous button
-          ElevatedButton(
-            onPressed: currentPage > 1 ? _previousPage : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: currentPage > 1
-                  ? Colors.black
-                  : Colors.grey[300],
-              foregroundColor: currentPage > 1
-                  ? Colors.white
-                  : Colors.grey[600],
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.chevron_left, size: 18.sp),
-                SizedBox(width: 4.w),
-                Text(
-                  'Previous',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          SizedBox(width: 16.w),
-
-          // Page numbers
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(31, 149, 148, 148),
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Text(
-              '$currentPage of $totalPages',
-              style: GoogleFonts.montserrat(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-          ),
-
-          SizedBox(width: 16.w),
-
-          // Next button
-          ElevatedButton(
-            onPressed: currentPage < totalPages ? _nextPage : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: currentPage < totalPages
-                  ? Colors.black
-                  : Colors.grey[300],
-              foregroundColor: currentPage < totalPages
-                  ? Colors.white
-                  : Colors.grey[600],
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Next',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(width: 4.w),
-                Icon(Icons.chevron_right, size: 18.sp),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSearchResultsHeader() {
     if (widget.searchQuery.isEmpty) return const SizedBox.shrink();
@@ -423,16 +292,13 @@ ElevatedButton(
                     children: [
                       // Current page cities
                       Column(
-                        children: currentPageCities.map((city) {
+                        children: filteredCities.map((city) {
                           return Padding(
                             padding: EdgeInsets.only(bottom: 16.h),
                             child: VerticalCityCard(city: city,),
                           );
                         }).toList(),
                       ),
-
-                      // Pagination controls
-                      if (totalPages > 1) _buildPaginationControls(),
                     ],
                   ),
           ],

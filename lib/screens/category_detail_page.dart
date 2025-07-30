@@ -188,19 +188,19 @@ setState(() {
     switch (widget.category.name.toLowerCase()) {
       case 'food':
         return {
-          'title': 'Explore cities through restaurants and their foods',
+          'title': 'Explore cities through restaurants and their foods.',
           'subtitle':
               'Best restaurants and their meals in $cityName , $countryName',
         };
       case 'lifestyle':
         return {
-          'title': 'Explore cities through lifestyle',
+          'title': 'Explore cities through lifestyle.',
           'subtitle': 'Different lifestyles in $cityName, $countryName',
         };
       case 'transport':
         return {
-          'title': 'Discover The World With Our Guide.',
-          'subtitle': 'Travel Guide for $cityName, $countryName',
+          'title': 'Ride Through the City in Motion',
+          'subtitle': 'Discover Transport in $cityName, $countryName',
         };
       case 'videography':
         return {

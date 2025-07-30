@@ -706,7 +706,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
 
     _controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
-      flags: const YoutubePlayerFlags(autoPlay: true, mute: false),
+      flags: const YoutubePlayerFlags(autoPlay: true, mute: false, enableCaption: false, forceHD: true ),
     );
   }
 
