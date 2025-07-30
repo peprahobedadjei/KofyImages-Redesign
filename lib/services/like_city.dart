@@ -19,7 +19,6 @@ class LikeCityService {
         return LikeResponse.fromJson(responseData);
       } else {
         final errorData = jsonDecode(response.body);
-        print(response.body);
         throw Exception(errorData['detail'] ?? 'Failed to update city');
       }
     } on FormatException {
@@ -28,7 +27,6 @@ class LikeCityService {
       // Re-throw API exceptions as-is
       rethrow;
     } catch (e) {
-      print(e.toString());
       // Log or rethrow the original error to debug better
       throw Exception('An unexpected error occurred');
     }

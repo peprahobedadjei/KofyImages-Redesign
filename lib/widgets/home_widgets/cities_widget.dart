@@ -79,19 +79,19 @@ Future<void> refreshCities() async {
   }
 
 
-  // Add this method to scroll to cities section
-  void _scrollToCitiesSection() {
-    if (widget.parentScrollController != null) {
-      final targetPosition =
-          400.h + 1400.h + 190.h; // Same position as in MyHomePage
+  // // Add this method to scroll to cities section
+  // void _scrollToCitiesSection() {
+  //   if (widget.parentScrollController != null) {
+  //     final targetPosition =
+  //         400.h + 1400.h + 190.h; // Same position as in MyHomePage
 
-      widget.parentScrollController!.animateTo(
-        targetPosition,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
+  //     widget.parentScrollController!.animateTo(
+  //       targetPosition,
+  //       duration: const Duration(milliseconds: 600),
+  //       curve: Curves.easeInOut,
+  //     );
+  //   }
+  // }
 
 
     void _scrollawayCitiesSection() {

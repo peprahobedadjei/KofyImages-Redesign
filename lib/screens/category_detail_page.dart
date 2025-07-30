@@ -198,7 +198,6 @@ Future<void> _onRefresh() async {
     }
   } catch (e) {
     // Handle any errors during the refresh process
-    print('Error during refresh: $e');
     // You might want to show a snackbar or toast to inform the user
   }
   
